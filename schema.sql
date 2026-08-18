@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS five_s_sites (
 );
 
 INSERT INTO five_s_sites(site) VALUES
-('BBO'),('BKN'),('BTO'),('EME'),('GNT'),('HRN'),('LKM'),('MGT'),('MVB'),('ORIC'),('RDP'),('UDW'),('VBL'),('WMB')
+('BBO'),('BKN'),('BTO'),('EME'),('GNT'),('HOF'),('HRN'),('LKM'),('MGT'),('MVB'),('ORIC'),('RDP'),('UDW'),('VBL'),('WMB')
 ON CONFLICT DO NOTHING;
 
 -- IMPORTANT:
