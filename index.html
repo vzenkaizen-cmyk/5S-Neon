@@ -77,6 +77,22 @@
     text-transform:uppercase; color:#9FCBB2; font-weight:600;
   }
 
+  /* ---------- Nav bar ---------- */
+  .navbar{
+    display:flex; gap:6px; align-items:center;
+    background:#1b2430; padding:8px 28px;
+  }
+  .navbar a{
+    color:#C8CDD6; text-decoration:none; font-size:13px; font-weight:600;
+    padding:7px 14px; border-radius:6px;
+  }
+  .navbar a.active{ background:#2f7a52; color:#fff; }
+  .navbar a:hover:not(.active){ background:#2a3442; }
+  @media (max-width:600px){
+    .navbar{ padding:8px 14px; flex-wrap:wrap; }
+    .navbar a{ flex:1 1 auto; text-align:center; }
+  }
+
   /* ---------- Meta bar ---------- */
   .metabar{
     background:var(--panel);
@@ -291,6 +307,10 @@
 </div>
 
 <div id="jasteca-root" style="display:none;">
+  <nav class="navbar" id="mainNav">
+    <a href="/" class="active">Audit</a>
+    <a href="/admin.html" id="navAdminLink" style="display:none;">Admin</a>
+  </nav>
   <div class="mast">
     <p class="mast-eyebrow">Vidullanka PLC · 5S Online Audit Form</p>
     <h1>5S Monthly Audit Sheet</h1>
@@ -301,7 +321,6 @@
     </div>
     <div class="sessionbar">
       <span class="session-chip" id="sessionUser">Not signed in</span>
-      <a class="logout-btn" id="adminLink" href="/admin.html" style="display:none;text-decoration:none;">Admin</a>
       <button class="logout-btn" id="logoutBtn" type="button">Sign out</button>
     </div>
   </div>
@@ -1249,8 +1268,8 @@
         : 'Internal Auditor';
 
     sessionUser.textContent = `${currentUser.full_name} · ${roleLabel}`;
-    const adminLink = document.getElementById('adminLink');
-    if(adminLink) adminLink.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
+    const navAdminLink = document.getElementById('navAdminLink');
+    if(navAdminLink) navAdminLink.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
     elOrg.value = 'Vidullanka PLC';
     audit.meta.org = 'Vidullanka PLC';
 
