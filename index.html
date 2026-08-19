@@ -301,6 +301,7 @@
     </div>
     <div class="sessionbar">
       <span class="session-chip" id="sessionUser">Not signed in</span>
+      <a class="logout-btn" id="adminLink" href="/admin.html" style="display:none;text-decoration:none;">Admin</a>
       <button class="logout-btn" id="logoutBtn" type="button">Sign out</button>
     </div>
   </div>
@@ -1248,6 +1249,8 @@
         : 'Internal Auditor';
 
     sessionUser.textContent = `${currentUser.full_name} · ${roleLabel}`;
+    const adminLink = document.getElementById('adminLink');
+    if(adminLink) adminLink.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
     elOrg.value = 'Vidullanka PLC';
     audit.meta.org = 'Vidullanka PLC';
 
