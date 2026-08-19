@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vidullanka PLC – 5S Monthly Audit Sheet</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Source+Serif+4:wght@500;600;700&display=swap');
 
   :root{
     --ink:#1B2430;
@@ -158,7 +158,7 @@
     padding:11px 0; border-bottom:1px dashed var(--line); flex-wrap:wrap;
   }
   .item:last-child{border-bottom:none;}
-  .item-label{flex:1; min-width:220px; font-size:13.5px;}
+  .item-label{flex:1; min-width:220px; font-size:13.5px;}\n  .item-label .si-text,.q14-item .si-text{display:block;margin-top:4px;font-family:'Noto Sans Sinhala',sans-serif;font-size:13px;line-height:1.55;color:#56606D;}\n  .item-label .si-text{padding-left:0;}\n  .q14-item .si-text{margin:4px 0 9px;}
   .item-label .inum{color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; font-size:11.5px; margin-right:6px;}
 
   .pills{display:flex; gap:5px; flex-shrink:0;}
@@ -520,6 +520,103 @@
     {id:'q5', label:'14.5', text:"i) Explain the role and commitment of your highest ranking Executive in Top Management initiatives. ii) Why is your highest ranking Executive the most suitable person to lead the JASTECA National Awards application?"},
   ];
 
+  // Sinhala translations for the checklist questions.
+  // The translations for 1.1–13.3 follow the supplied JASTECA 2026
+  // trilingual audit document; the remaining expanded checklist items are
+  // translated to match the English wording used in this online form.
+  const SINHALA = {
+    '1.1':'සියලුම කණ්ඩායම් සාමාජිකයින්ගේ 5S දැනුම / අවබෝධය / දැනුවත්භාවය',
+    '1.2':'5S ගමනේ සියලුම කණ්ඩායම් සාමාජිකයින්ගේ සහභාගීත්වය, කැපවීම සහ සම්බන්ධතාවය',
+    '1.3':'5S අවශ්‍යතා සමඟ සම්පූර්ණ අත්පොතක් සකස් කර තිබීම',
+    '1.4':'ඉහළ කළමනාකරණය සහ අභ්‍යන්තර පරීක්ෂණ කණ්ඩායම ඇතුළුව සියලුම කණ්ඩායම් සාමාජිකයින්ගෙන් සමන්විත 5S මාර්ගෝපදේශ කමිටුව පිහිටුවා තිබීම',
+    '1.5':'5S පුහුණුව හඳුනාගැනීම සහ පහසුකම් සැපයීම පිළිබඳ සාක්ෂි',
+    '2.1':'පරිශ්‍රයේ ඇතුළත සහ පිටත ප්‍රදේශ අවුල් රහිත වීම',
+    '2.2':'අනවශ්‍ය භාණ්ඩ පරිශ්‍රයෙන්, කාර්යාලවලින් සහ සේවා ස්ථානවලින් ඉවත් කර තිබීම',
+    '2.3':'අල්මාරි, රාක්ක, මේස සහ ලාච්චු අනවශ්‍ය ද්‍රව්‍යවලින් තොර වීම',
+    '2.4':'දැන්වීම් පුවරු – යාවත්කාලීන නිවේදන සහ ඉවත් කිරීමේ උපදෙස්',
+    '2.5':'කහ සහ රතු ටැග් භාවිතයෙන් ඉවත් කිරීමේ නීති',
+    '2.6':'සෙයිරි ව්‍යාපෘති ස්ථාපිත කර තිබීම',
+    '3.1':'5S ක්‍රියාත්මක කිරීමට පෙර සහ පසුව ඡායාරූප සාක්ෂි',
+    '3.2':'ප්‍රවේශ දොරටුවේ සිට සියලු පහසුකම් සඳහා දිශා දර්ශක පුවරු',
+    '3.3':'කර්මාන්තශාලා / ගබඩා සඳහා ග්‍රිඩ් සලකුණු තිබීම',
+    '3.4':'යන්ත්‍ර / කාමර / වැසිකිළි සඳහා හඳුනාගැනීමේ ලේබල් තිබීම',
+    '3.5':'උපකරණ, මෙවලම් සහ ගොනු “බැලිය හැකි, ගත හැකි, ආපසු තැබිය හැකි” මූලධර්ම අනුව සකස් කර තිබීම',
+    '3.6':'X-අක්ෂය සහ Y-අක්ෂය අනුව පෙළගැස්ම පැහැදිලිව දක්නට ලැබීම',
+    '3.7':'දෝෂ / නැවත වැඩ කිරීම / ගොනු / උපකරණ සඳහා දෘශ්‍ය පාලන ක්‍රම සහ මිශ්‍ර වීම වැළැක්වීමේ ක්‍රම තිබීම',
+    '3.8':'ගමන් මාර්ග, ප්‍රවේශ සහ පිටවීමේ රේඛා පැහැදිලිව සලකුණු කර තිබීම',
+    '3.9':'වාහන, පැලට්, ට්‍රොලි, අපද්‍රව්‍ය බඳුන් ආදිය සඳහා වෙන් කළ වාහන නැවැත්වීමේ / තැබීමේ ප්‍රදේශ තිබීම',
+    '3.10':'වර්ණ කේත භාවිතයෙන් නිසි වයර් කළමනාකරණයක් පවත්වාගෙන යාම',
+    '3.11':'ස්විච, බ්‍රේකර්, පංකා සහ රෙගියුලේටර් සඳහා ලේබල් තිබීම',
+    '3.12':'ගබඩා ප්‍රදේශ පැහැදිලිව සලකුණු කළ රාක්ක / බඳුන් සමඟ පවත්වාගෙන යාම',
+    '3.13':'ගබඩා භාණ්ඩ ලබාගැනීමේ කාලය නිර්වචනය කර තිබීම',
+    '3.14':'සෙයිටොන් නඩත්තු කිරීමේ ක්‍රම ස්ථාපිත කර තිබීම',
+    '4.1':'බිම්, බිත්ති, ජනේල සහ වැසිකිළි පිරිසිදුව සහ භාවිතයට සුදුසු වීම',
+    '4.2':'දෛනික ස්වයං පිරිසිදු කිරීමේ ක්‍රියාකාරකම්',
+    '4.3':'පිරිසිදු කිරීමේ වගකීම් සිතියම් සහ කාලසටහන් ප්‍රදර්ශනය කර තිබීම',
+    '4.4':'අපද්‍රව්‍ය බඳුන් ක්‍රමවේදයක් ක්‍රියාත්මක කර තිබීම',
+    '4.5':'දෛනික පිරිසිදු කිරීමේ වාර්තා පිළිබඳ සාක්ෂි',
+    '4.6':'පිරිසිදු කිරීමේ උපකරණ – කොසු / මොප් / අනෙකුත් උපකරණ සහ පිරිසිදුකාරක – නිසි ලෙස ගබඩා කර තිබීම',
+    '4.7':'යන්ත්‍ර / උපකරණ / මෙවලම් / ගෘහ භාණ්ඩ ඉහළ පිරිසිදුකමකින් පවත්වාගෙන යාම සහ නඩත්තු කාලසටහන් ප්‍රදර්ශනය කර තිබීම',
+    '4.8':'සමස්ත පරිශ්‍රයේ පිරිසිදුකම පැහැදිලිව පවත්වාගෙන යාම',
+    '5.1':'5S ක්‍රියා පටිපාටි පරීක්ෂණ ලැයිස්තු සහ ලේබල් මත ප්‍රමිතිකරණය කර තිබීම',
+    '5.2':'මාර්ග, ගමන් මාර්ග සහ ප්‍රධාන ගමන් මාර්ග 5S ක්‍රියා පටිපාටි අනුව ප්‍රමිතිකරණය කර තිබීම',
+    '5.3':'වෑල්ව්, දොරවල් ආදියෙහි අනතුරු / විවෘත හා වසා දැමීමේ දිශා ලේබල් සඳහා දෘශ්‍ය සලකුණු තිබීම',
+    '5.4':'තෙල් / ලිහිසි ද්‍රව්‍ය බඳුන් සහ ගිනි නිවන උපකරණ සඳහා ප්‍රමිතිගත දෘශ්‍ය සලකුණු තිබීම',
+    '5.5':'ජාත්‍යන්තර ප්‍රමිතිය අනුව පයිප්ප / කේබල් ආදිය වර්ණ කේත කර තිබීම',
+    '5.6':'ගොනු, වාර්තා, ගෘහ භාණ්ඩ සහ උපකරණ ප්‍රමිතිකරණය කර තිබීම',
+    '6.1':'සියලුම සේවක කාණ්ඩ සඳහා නිතිපතා 5S පුහුණු වැඩසටහන් පිළිබඳ සාක්ෂි',
+    '6.2':'කර්මාන්තශාලා / වැඩබිම් කණ්ඩායමේ 5S දැනුම / අවබෝධය / දැනුවත්භාවය',
+    '6.3':'5S කණ්ඩායම් ක්‍රියාකාරකම් පිළිබඳ සාක්ෂි',
+    '6.4':'කයිසන් වැඩසටහන් ප්‍රවර්ධනය සහ කයිසන් ක්‍රියාත්මක කිරීමේ වාර්තා',
+    '6.5':'පරීක්ෂණ කණ්ඩායම් මඟින් අභ්‍යන්තර විගණන සිදු කිරීම පිළිබඳ සාක්ෂි',
+    '6.6':'කාර්ය මණ්ඩලය අතර ස්වයං විනය, හොඳ සහ නරක කරුණු ස්ටිකර් ආදිය පවත්වාගෙන යාම',
+    '6.7':'සේවක පවුල් අතර 5S සටන් පාඨ සහ පෝස්ටර් තරඟ පැවැත්වීම පිළිබඳ සාක්ෂි',
+    '6.8':'ආයතනය පුරා සමස්ත ස්වයං විනය පිළිබඳ සාක්ෂි',
+    '7.1':'එක් සේවකයෙකුගේ ඵලදායිතාව වැඩි කිරීමට භාවිත කළ ක්‍රම සහ පද්ධති පිළිබඳ සාක්ෂි',
+    '7.2':'ඵලදායිතාව වැඩිවීම පිළිබඳ සාක්ෂි (උදා: ලාභ / විකුණුම් / ඵලදායිතා අනුපාත)',
+    '7.3':'5S හරහා ඉඩ භාවිතය සහ ඉඩ ඉතිරි කිරීම',
+    '7.4':'ඵලදායිතාව වැඩි කිරීමට භාවිත කළ නව්‍ය ක්‍රම',
+    '7.5':'ඵලදායිතාව වැඩි කිරීම සඳහා 5S ක්‍රියාවලිය භාවිත කළ බවට සාක්ෂි',
+    '8.1':'ප්‍රතික්ෂේපිත නිෂ්පාදන සහ නැවත වැඩ කිරීම අඩු කිරීම',
+    '8.2':'පාරිභෝගික පැමිණිලි සහ ඉල්ලීම් අඩු කිරීම',
+    '8.3':'ගුණාත්මකභාවය පිළිබඳ පාරිභෝගික තෘප්තිය මැනීම',
+    '9.1':'ද්‍රව්‍ය පිරිවැය අඩු කිරීම පිළිබඳ සාක්ෂි',
+    '9.2':'ශ්‍රම පිරිවැය අඩු කිරීම පිළිබඳ සාක්ෂි',
+    '9.3':'බලශක්ති පිරිවැය අඩු කිරීම පිළිබඳ සාක්ෂි',
+    '10.1':'වසර තුළ සිදුවන අනතුරු අඩුවීම මඟින් මනින ලද ආරක්ෂක ක්‍රියාමාර්ගවල ප්‍රතිඵල පිළිබඳ සාක්ෂි',
+    '10.2':'ආරක්ෂාව / ගිනි නිවාරණ / ප්‍රථමාධාර ආදිය සඳහා කැප වූ කණ්ඩායමකට ප්‍රමාණවත් පුහුණුව ලබා දී තිබීම',
+    '10.3':'ආයතනයේ ඇතුළත සහ පිටත ප්‍රමාණවත් ගිනි නිවන උපකරණ සහ අදාළ උපකරණ තිබීම',
+    '10.4':'යන්ත්‍ර සහ උපකරණවල ආරක්ෂක ක්‍රියාමාර්ග සඳහා භාවිත කළ ක්‍රම',
+    '10.5':'සේවකයින් / අමුත්තන් සඳහා ආරක්ෂාව තහවුරු කිරීමට භාවිත කළ ක්‍රම',
+    '10.6':'හදිසි ගිනි ඉවත් කිරීමේ පද්ධතිය හොඳින් ස්ථාපිත කර ප්‍රදර්ශනය කර තිබීම',
+    '10.7':'විශිෂ්ට නිෂ්පාදනයක් / සේවාවක් සැපයීමේදී භාවිත කළ ආරක්ෂක ක්‍රියාමාර්ග පිළිබඳ සාක්ෂි',
+    '11.1':'නිෂ්පාදන / සේවා නිසි වේලාවට ලබාදීම පිළිබඳ සාක්ෂි',
+    '11.2':'රැඳී සිටීමේ කාලය අඩුවීම පිළිබඳ සාක්ෂි',
+    '11.3':'බෙදාහැරීමේ කාලය කෙටි කිරීම සඳහා 5S ක්‍රමය හරහා ඵලදායී ක්‍රම ක්‍රියාත්මක කර තිබීම',
+    '12.1':'කණ්ඩායම් සාමාජිකයින්ගේ මානසික උද්යෝග මට්ටම',
+    '12.2':'සේවක මානසික උද්යෝගය වැඩි කිරීමට භාවිත කළ නව්‍ය ක්‍රම',
+    '12.3':'සේවකයින් විසින් ලබා දී ඇති යෝජනා සංඛ්‍යාව',
+    '12.4':'සේවයට නොපැමිණීම අඩු කිරීම',
+    '12.5':'සේවක පිරිවැටුම / සේවක ඉවත්වීම අඩු කිරීම',
+    '12.6':'බහු කුසලතා සහිත ක්‍රියාකරුවන් / කාර්ය මණ්ඩලය',
+    '12.7':'5S සම්බන්ධ CSR ක්‍රියාකාරකම්වල සේවක සහභාගීත්වය',
+    '13.1':'5S ක්‍රියාකාරකම් නිරීක්ෂණය සඳහා ඩිජිටල් මෙවලම් භාවිතය (විගණන මෘදුකාංග, නිරීක්ෂණ මෙවලම්, 5S පරිගණක ෆෝල්ඩර් ආදිය)',
+    '13.2':'අතින් සිදු කරන ක්‍රියාවලි සහ දෝෂ අඩු කිරීමට ස්වයංක්‍රීයකරණය ක්‍රියාත්මක කිරීම',
+    '13.3':'5S ක්‍රියාකාරකම්වල වැඩිදියුණු කළ යුතු ක්ෂේත්‍ර හඳුනා ගැනීම සඳහා දත්ත විශ්ලේෂණ භාවිතය',
+    '13.4':'දෛනික මෙහෙයුම් සඳහා සහාය වීමට තොරතුරු තාක්ෂණ උපකරණ (සේවාදායක, පරිගණක ආදිය) නඩත්තු කිරීම සහ කළමනාකරණය',
+    '13.5':'තත්‍ය කාලීන දත්ත ඇතුළත් කිරීම සහ විගණන වාර්තාකරණය සඳහා ජංගම යෙදුම් හෝ ටැබ්ලට් භාවිතය',
+    '13.6':'MIS සම්බන්ධ දත්ත ආරක්ෂා කිරීම සඳහා සයිබර් ආරක්ෂණ ක්‍රියාමාර්ග ක්‍රියාත්මක කර තිබීම',
+    '13.7':'5S වැඩසටහන් සඳහා සේවකයින්ගේ තාක්ෂණ භාවිතය වැඩිදියුණු කිරීමට පුහුණු වැඩසටහන්'
+  };
+
+  const Q14_SINHALA = {
+    q1:'ඵලදායිතාව, ගුණාත්මකභාවය, පිරිවැය, බෙදාහැරීම, ආරක්ෂාව සහ මානසික උද්යෝගය (PQCDSM) වැඩිදියුණු කිරීම සඳහා ඔබගේ ආයතනය ලීන් කළමනාකරණ මූලධර්ම ක්‍රියාත්මක කර ඇති ආකාරය විස්තර කරන්න. මැනිය හැකි වැඩිදියුණු කිරීම් සහ උදාහරණ සපයන්න.',
+    q2:'මෙහෙයුම් කාර්යක්ෂමතාව, ආරක්ෂාව, සන්නිවේදනය සහ තිරසාරභාවය වැඩිදියුණු කිරීම සඳහා තාක්ෂණය, නව්‍යකරණය සහ දත්ත මත පදනම් වූ ක්‍රම ඔබගේ ලීන් කළමනාකරණ ගමනට ඒකාබද්ධ කර ඇති ආකාරය විස්තර කරන්න.',
+    q3:'නාස්තිය හඳුනා ගැනීමට, වැඩ ප්‍රවාහයේ කාර්යක්ෂමතාව වැඩි කිරීමට, දෝෂ අඩු කිරීමට සහ මෙහෙයුම් ප්‍රමිතිකරණය කිරීමට භාවිත කරන පද්ධති, ක්‍රම සහ දෘශ්‍ය කළමනාකරණ ක්‍රියාමාර්ග විස්තර කරන්න. සාර්ථක වැඩිදියුණු කිරීම් සඳහා උදාහරණ ඇතුළත් කරන්න.',
+    q4:'කාර්යසාධනය සහ පාරිභෝගික තෘප්තිය වැඩිදියුණු කිරීම සඳහා කයිසන්, ගැටලු විසඳීම, සේවා ස්ථාන නිරීක්ෂණය (Gemba) සහ සේවක යෝජනා පද්ධති වැනි අඛණ්ඩ වැඩිදියුණු කිරීමේ ක්‍රම ඔබගේ ආයතනය භාවිත කරන ආකාරය විස්තර කරන්න.',
+    q5:'i) ඉහළම ශ්‍රේණියේ විධායක නිලධාරියාගේ ඉහළ කළමනාකරණ වැඩසටහන් සඳහා වන භූමිකාව සහ කැපවීම විස්තර කරන්න. ii) JASTECA ජාතික සම්මාන අයදුම්පත මෙහෙයවීමට එම ඉහළම ශ්‍රේණියේ විධායක නිලධාරියා වඩාත් සුදුසු පුද්ගලයා වන්නේ ඇයිදැයි විස්තර කරන්න.'
+  };
+
   const RATING_LABELS = ['Poor','Fair','Good','Very good','Excellent'];
   const RATING_COLORS = ['#B5533C','#C77B3E','#C99A3E','#7FA23E','#2F7A52'];
   const GRAND_MAX = SECTIONS.reduce((a,s)=>a+s.max,0); // 410
@@ -614,7 +711,8 @@
           const sel = audit.scores[key]===v ? 'selected':'';
           return `<div class="pill ${sel}" data-v="${v}" data-key="${key}" title="${RATING_LABELS[v-1]}">${v}</div>`;
         }).join('');
-        row.innerHTML = `<div class="item-label"><span class="inum">${code}</span>${label}</div><div class="pills">${pillsHtml}</div>`;
+        const sinhala = SINHALA[code] || '';
+        row.innerHTML = `<div class="item-label"><span class="inum">${code}</span><span class="en-text">${escHtml(label)}</span>${sinhala ? `<span class="si-text">${escHtml(sinhala)}</span>` : ''}</div><div class="pills">${pillsHtml}</div>`;
         inner.appendChild(row);
       });
 
@@ -710,8 +808,9 @@
       const savedScore = audit.q14.score[q.id]!==undefined ? audit.q14.score[q.id] : '';
       wrap.innerHTML = `
         <div class="qhead"><span class="qnum">${q.label}</span></div>
-        <p class="qtext">${q.text}</p>
-        <textarea placeholder="Write response here (max ~100 words), reference evidence attached separately...">${savedText}</textarea>
+        <p class="qtext">${escHtml(q.text)}</p>
+        ${Q14_SINHALA[q.id] ? `<div class="si-text">${escHtml(Q14_SINHALA[q.id])}</div>` : ''}
+        <textarea placeholder="Write response here (max ~100 words), reference evidence attached separately...">${escHtml(savedText)}</textarea>
         <div class="q14-foot">
           <span class="wordcount">0 words</span>
           <div class="scoreinput">
@@ -973,8 +1072,10 @@
     elDept.value = audit.meta.dept||'';
     elMonth.value = audit.meta.month||'';
     elAuditor.value = audit.meta.auditor || currentUser?.full_name || '';
-    audit.meta.auditor = currentUser?.full_name || audit.meta.auditor || '';
-    audit.meta.auditorType = currentUser?.role === 'external' ? 'external' : 'internal';
+    if(!audit.meta.auditor) audit.meta.auditor = currentUser?.full_name || '';
+    if(!audit.meta.auditorType){
+      audit.meta.auditorType = currentUser?.role === 'external' ? 'external' : 'internal';
+    }
     if(auditorInternal) auditorInternal.checked = audit.meta.auditorType === 'internal';
     if(auditorExternal) auditorExternal.checked = audit.meta.auditorType === 'external';
   }
@@ -1019,44 +1120,178 @@
     }
   }
 
+  let auditorDirectory = [];
+
   async function refreshAuditorOptions(){
     if(!currentUser) return;
     try{
       const body=await api('/api/auditors');
-      const names=body.auditors||[];
-      elAuditor.innerHTML='<option value="">— select auditor —</option>'+names.map(a=>`<option value="${escHtml(a.full_name)}">${escHtml(a.full_name)} · ${a.role==='external'?'External':'Internal'}</option>`).join('')+'<option value="__other__">Other / Enter name</option>';
-      const current=currentUser.full_name||audit.meta.auditor||'';
-      if(names.some(a=>a.full_name===current)) elAuditor.value=current; else if(current){elAuditor.value='__other__';elAuditorOther.style.display='block';elAuditorOther.value=current;}
-    }catch(e){ console.error(e); }
+      auditorDirectory=(body.auditors||[]).map(a=>({
+        full_name:String(a.full_name||'').trim(),
+        role:(a.role||'internal').toLowerCase()==='external'?'external':'internal',
+        sites:Array.isArray(a.sites)?a.sites:[]
+      })).filter(a=>a.full_name);
+
+      // Always include the signed-in user even if the API directory is temporarily
+      // missing that user.
+      if(!auditorDirectory.some(a=>a.full_name===currentUser.full_name)){
+        auditorDirectory.unshift({
+          full_name:currentUser.full_name,
+          role:currentUser.role==='external'?'external':'internal',
+          sites:currentUser.sites||[]
+        });
+      }
+
+      const options = auditorDirectory.map(a =>
+        `<option value="${escHtml(a.full_name)}">${escHtml(a.full_name)} · ${a.role==='external'?'External Auditor':'Internal Auditor'}</option>`
+      ).join('');
+
+      elAuditor.innerHTML =
+        '<option value="">— select auditor —</option>' +
+        options +
+        '<option value="__other__">Other / Enter name</option>';
+
+      const current=audit.meta.auditor || currentUser.full_name || '';
+      if(auditorDirectory.some(a=>a.full_name===current)){
+        elAuditor.value=current;
+        elAuditorOther.style.display='none';
+        syncAuditorTypeFromSelection();
+      }else if(current){
+        elAuditor.value='__other__';
+        elAuditorOther.style.display='block';
+        elAuditorOther.value=current;
+        if(!audit.meta.auditorType) audit.meta.auditorType=currentUser.role==='external'?'external':'internal';
+        auditorInternal.disabled=false;
+        auditorExternal.disabled=false;
+        auditorInternal.checked=audit.meta.auditorType==='internal';
+        auditorExternal.checked=audit.meta.auditorType==='external';
+      }
+    }catch(e){
+      console.error(e);
+      // Keep the current user usable even if the auditor directory endpoint fails.
+      elAuditor.innerHTML='<option value="">— select auditor —</option>' +
+        `<option value="${escHtml(currentUser.full_name)}">${escHtml(currentUser.full_name)} · ${currentUser.role==='external'?'External Auditor':'Internal Auditor'}</option>` +
+        '<option value="__other__">Other / Enter name</option>';
+      elAuditor.value=audit.meta.auditor||currentUser.full_name;
+      syncAuditorTypeFromSelection();
+    }
+  }
+
+  function syncAuditorTypeFromSelection(){
+    const name=elAuditor.value;
+    const found=auditorDirectory.find(a=>a.full_name===name);
+    if(found){
+      audit.meta.auditor=found.full_name;
+      audit.meta.auditorType=found.role;
+      auditorInternal.checked=found.role==='internal';
+      auditorExternal.checked=found.role==='external';
+      auditorInternal.disabled=true;
+      auditorExternal.disabled=true;
+      elAuditorOther.style.display='none';
+      elAuditorOther.value='';
+    }else if(name==='__other__'){
+      auditorInternal.disabled=false;
+      auditorExternal.disabled=false;
+      const role=audit.meta.auditorType || (currentUser?.role==='external'?'external':'internal');
+      auditorInternal.checked=role==='internal';
+      auditorExternal.checked=role==='external';
+      elAuditorOther.style.display='block';
+    }
   }
 
   function applyAuditorSelection(){
     const v=elAuditor.value;
-    audit.meta.auditor=(v==='__other__' ? elAuditorOther.value.trim() : v) || currentUser?.full_name || '';
+    if(v==='__other__'){
+      audit.meta.auditor=elAuditorOther.value.trim();
+      audit.meta.auditorType=auditorExternal.checked?'external':'internal';
+    }else if(v){
+      const found=auditorDirectory.find(a=>a.full_name===v);
+      audit.meta.auditor=found?.full_name || v;
+      audit.meta.auditorType=found?.role || audit.meta.auditorType || 'internal';
+    }else{
+      audit.meta.auditor='';
+      audit.meta.auditorType='';
+    }
+    if(auditorInternal) auditorInternal.checked=audit.meta.auditorType==='internal';
+    if(auditorExternal) auditorExternal.checked=audit.meta.auditorType==='external';
   }
+
   elAuditor.addEventListener('change',()=>{
-    elAuditorOther.style.display=elAuditor.value==='__other__'?'block':'none';
-    applyAuditorSelection(); refreshAll();
+    syncAuditorTypeFromSelection();
+    applyAuditorSelection();
+    refreshAll();
   });
-  elAuditorOther.addEventListener('input',()=>{applyAuditorSelection();refreshAll();});
+
+  elAuditorOther.addEventListener('input',()=>{
+    applyAuditorSelection();
+    refreshAll();
+  });
+
+  [auditorInternal,auditorExternal].forEach(r=>{
+    r?.addEventListener('change',()=>{
+      if(elAuditor.value==='__other__'){
+        audit.meta.auditorType=r.value;
+        auditorInternal.checked=r.value==='internal';
+        auditorExternal.checked=r.value==='external';
+        refreshAll();
+      }
+    });
+  });
 
   function applyUserAccess(){
     if(!currentUser) return;
-    sessionUser.textContent = `${currentUser.full_name} · ${currentUser.role === 'external' ? 'External Auditor' : currentUser.role === 'admin' ? 'Administrator' : 'Internal Auditor'}`;
-    elAuditor.value = currentUser.full_name;
-    elAuditorOther.style.display='none';
-    elAuditorOther.value='';
+
+    const roleLabel = currentUser.role === 'external'
+      ? 'External Auditor'
+      : currentUser.role === 'admin'
+        ? 'Administrator'
+        : 'Internal Auditor';
+
+    sessionUser.textContent = `${currentUser.full_name} · ${roleLabel}`;
     elOrg.value = 'Vidullanka PLC';
     audit.meta.org = 'Vidullanka PLC';
-    audit.meta.auditor = currentUser.full_name;
-    audit.meta.auditorType = currentUser.role === 'external' ? 'external' : 'internal';
-    auditorInternal.checked = audit.meta.auditorType === 'internal';
-    auditorExternal.checked = audit.meta.auditorType === 'external';
 
-    const allowed = (currentUser.role === 'external' || currentUser.role === 'admin') ? SITES : (currentUser.sites || []);
-    elSite.innerHTML = '<option value="">— select site —</option>' + allowed.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
-    if(audit.meta.site && allowed.includes(audit.meta.site)) elSite.value = audit.meta.site;
-    else if(allowed.length === 1){ audit.meta.site=allowed[0]; elSite.value=allowed[0]; }
+    // A new audit starts with the signed-in user. A loaded audit keeps its
+    // original auditor instead of being overwritten by the current session.
+    if(!audit.meta.auditor){
+      audit.meta.auditor=currentUser.full_name;
+      audit.meta.auditorType=currentUser.role==='external'?'external':'internal';
+    }
+
+    const allowed = (currentUser.role === 'external' || currentUser.role === 'admin')
+      ? SITES
+      : (Array.isArray(currentUser.sites) ? currentUser.sites : []);
+
+    elSite.innerHTML =
+      '<option value="">— select site —</option>' +
+      allowed.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+
+    if(audit.meta.site && allowed.includes(audit.meta.site)){
+      elSite.value=audit.meta.site;
+    }else if(allowed.length===1 && !audit.meta.site){
+      audit.meta.site=allowed[0];
+      elSite.value=allowed[0];
+    }else{
+      elSite.value='';
+    }
+
+    // Keep the selected auditor/type visible and consistent.
+    if(elAuditor.value!==audit.meta.auditor){
+      if(auditorDirectory.some(a=>a.full_name===audit.meta.auditor)){
+        elAuditor.value=audit.meta.auditor;
+      }else if(audit.meta.auditor){
+        elAuditor.value='__other__';
+        elAuditorOther.style.display='block';
+        elAuditorOther.value=audit.meta.auditor;
+      }
+    }
+    syncAuditorTypeFromSelection();
+    if(elAuditor.value==='__other__'){
+      auditorInternal.disabled=false;
+      auditorExternal.disabled=false;
+      auditorInternal.checked=audit.meta.auditorType==='internal';
+      auditorExternal.checked=audit.meta.auditorType==='external';
+    }
   }
 
   async function getAuditsForSite(site){
@@ -1065,41 +1300,108 @@
       const q = site ? `/api/audits?site=${encodeURIComponent(site)}` : '/api/audits';
       const body = await api(q);
       return body.audits || [];
-    }catch(e){ console.error(e); showStatus('Could not load saved audits: '+e.message,true); return []; }
+    }catch(e){
+      console.error(e);
+      showStatus('Could not load saved audits: '+e.message,true);
+      return [];
+    }
   }
 
   async function refreshLoadSelect(){
     if(!currentUser) return;
-    const list = await getAuditsForSite(audit.meta.site);
-    elLoadSelect.innerHTML = '<option value="">— select record —</option>' +
+
+    // IMPORTANT: the saved-audit dropdown is based on the signed-in user's
+    // access scope, NOT on the currently selected audit. This keeps all other
+    // records visible after one record is loaded.
+    let list = await getAuditsForSite('');
+
+    const isExternalOrAdmin = currentUser.role==='external' || currentUser.role==='admin';
+    if(!isExternalOrAdmin){
+      const allowedSites = new Set(Array.isArray(currentUser.sites)?currentUser.sites:[]);
+      list = list.filter(x=>allowedSites.has(x.site));
+    }
+
+    list.sort((a,b)=>{
+      const byMonth=String(b.audit_month||'').localeCompare(String(a.audit_month||''));
+      if(byMonth!==0) return byMonth;
+      return String(a.site||'').localeCompare(String(b.site||''));
+    });
+
+    const previousValue =
+      elLoadSelect.value ||
+      (audit.meta.site && audit.meta.month ? `${audit.meta.site}|${audit.meta.month}` : '');
+
+    elLoadSelect.innerHTML =
+      '<option value="">— select record —</option>' +
       list.map(x=>{
-        const month = x.audit_month || '';
-        const label = `${x.site} · ${month} · ${x.auditor || ''} · ${x.auditor_type || ''} (${x.overall_total}/${GRAND_MAX+Q14_MAX})`;
-        return `<option value="${escHtml(x.site+'|'+month)}">${escHtml(label)}</option>`;
+        const month=x.audit_month||'';
+        const type=(x.auditor_type||'').toLowerCase()==='external' ? 'External Auditor' : 'Internal Auditor';
+        const label=`${x.site||''} · ${month} · ${x.auditor||''} · ${type} (${x.overall_total||0}/${GRAND_MAX+Q14_MAX})`;
+        return `<option value="${escHtml((x.site||'')+'|'+month)}">${escHtml(label)}</option>`;
       }).join('');
-    if(audit.meta.site && audit.meta.month){
-      const value=`${audit.meta.site}|${audit.meta.month}`;
-      if([...elLoadSelect.options].some(o=>o.value===value)) elLoadSelect.value=value;
+
+    if(previousValue && [...elLoadSelect.options].some(o=>o.value===previousValue)){
+      elLoadSelect.value=previousValue;
     }
   }
 
   async function loadAudit(compositeValue){
     if(!compositeValue || !currentUser) return;
-    const [site, month] = compositeValue.split('|');
+
+    const parts=compositeValue.split('|');
+    const site=parts[0], month=parts.slice(1).join('|');
     if(!site || !month) return;
+
     try{
-      const body = await api(`/api/audit?site=${encodeURIComponent(site)}&month=${encodeURIComponent(month)}`);
+      const body=await api(`/api/audit?site=${encodeURIComponent(site)}&month=${encodeURIComponent(month)}`);
       const data=body.audit;
+      const savedType=(data.auditor_type || data.auditorType || data.audit?.meta?.auditorType || '').toLowerCase();
+
       audit={
-        meta:{org:'Vidullanka PLC',site:data.site||site,dept:data.department||'',month:data.audit_month||month,auditor:currentUser.full_name,auditorType:currentUser.role==='external'?'external':'internal'},
-        scores:data.scores||{},sectionNotes:data.section_notes||{},q14:data.q14||{text:{},score:{}},specialNote:data.special_note||'',signature:data.signature||{dataUrl:'',signedAt:null},savedAt:data.saved_at||data.updated_at||null
+        meta:{
+          org:'Vidullanka PLC',
+          site:data.site||site,
+          dept:data.department||'',
+          month:data.audit_month||month,
+          auditor:data.auditor || data.audit?.meta?.auditor || '',
+          auditorType:savedType==='external'?'external':savedType==='internal'?'internal':''
+        },
+        scores:data.scores||{},
+        sectionNotes:data.section_notes||{},
+        q14:data.q14||{text:{},score:{}},
+        specialNote:data.special_note||'',
+        signature:data.signature||{dataUrl:'',signedAt:null},
+        savedAt:data.saved_at||data.updated_at||null
       };
+
+      // Fallback only if the saved record does not contain auditor metadata.
+      if(!audit.meta.auditor){
+        audit.meta.auditor=currentUser.full_name;
+        audit.meta.auditorType=currentUser.role==='external'?'external':'internal';
+      }
+
       fullRender();
       applyUserAccess();
       await refreshAuditorOptions();
+
+      // refreshAuditorOptions can sync the saved auditor/type if it is in the directory.
+      if(audit.meta.auditorType==='external'){
+        auditorExternal.checked=true; auditorInternal.checked=false;
+      }else if(audit.meta.auditorType==='internal'){
+        auditorInternal.checked=true; auditorExternal.checked=false;
+      }
+
       await refreshLoadSelect();
-      showStatus(`Loaded audit for ${site} · ${month}.`);
-    }catch(e){console.error(e);showStatus('Could not load that audit: '+e.message,true);}
+      const selectedValue=`${site}|${month}`;
+      if([...elLoadSelect.options].some(o=>o.value===selectedValue)){
+        elLoadSelect.value=selectedValue;
+      }
+
+      showStatus(`Loaded audit for ${site} · ${month}. Other accessible records remain available in the dropdown.`);
+    }catch(e){
+      console.error(e);
+      showStatus('Could not load that audit: '+e.message,true);
+    }
   }
 
   async function saveAudit(){
@@ -1117,9 +1419,20 @@
     if(!audit.signature || !audit.signature.dataUrl){ showStatus('Please provide the auditor e-signature before saving the final audit.',true); document.getElementById('signatureCanvas')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     const overallTotal = SECTIONS.reduce((a,s)=>a+sectionTotal(s),0) + q14Total();
     audit.savedAt = new Date().toISOString();
-    audit.meta.org='Vidullanka PLC'; audit.meta.auditor=currentUser.full_name;
+    audit.meta.org='Vidullanka PLC';
+    if(!audit.meta.auditor){
+      audit.meta.auditor=currentUser.full_name;
+      audit.meta.auditorType=currentUser.role==='external'?'external':'internal';
+    }
     try{
-      const body=await api('/api/audits',{method:'POST',body:JSON.stringify({site:audit.meta.site,audit_month:audit.meta.month,audit,overall_total:overallTotal})});
+      const body=await api('/api/audits',{method:'POST',body:JSON.stringify({
+        site:audit.meta.site,
+        audit_month:audit.meta.month,
+        auditor:audit.meta.auditor,
+        auditor_type:audit.meta.auditorType,
+        audit,
+        overall_total:overallTotal
+      })});
       audit.savedAt=body.audit?.saved_at||audit.savedAt;
       await refreshLoadSelect();
       showStatus(`Saved ${audit.meta.site} · ${audit.meta.month} to Neon PostgreSQL.`);
@@ -1164,21 +1477,78 @@ Continue with deletion?`))return;
   const signupSites=document.getElementById('signupSites');
   const signupSitesField=document.getElementById('signupSitesField');
   const signupFullName=document.getElementById('signupFullName');
-  const predefinedAuditors={Ruwan:'internal',Shanuka:'internal',Arunoda:'internal',Chanaka:'internal',Roshan:'external',Mahela:'external',Damitha:'external'};
   signupSites.innerHTML=SITES.map(s=>`<label style="font-size:12px;"><input type="checkbox" name="signupSite" value="${s}"> ${s}</label>`).join('');
-  signupBtn.addEventListener('click',()=>{signupModal.style.display='flex';signupMsg.textContent='';signupFullName.focus();});
-  signupCancel.addEventListener('click',()=>{signupModal.style.display='none';signupForm.reset();});
-  document.querySelectorAll('input[name="signupRole"]').forEach(r=>r.addEventListener('change',()=>{signupSitesField.style.display=r.value==='internal'&&r.checked?'block':'none';}));
-  signupFullName.addEventListener('input',()=>{const role=predefinedAuditors[signupFullName.value.trim()]; if(role){document.querySelector(`input[name="signupRole"][value="${role}"]`).checked=true; signupSitesField.style.display=role==='internal'?'block':'none';}});
+
+  function syncSignupRoleUI(){
+    const role=document.querySelector('input[name="signupRole"]:checked')?.value || 'internal';
+    const internal=role==='internal';
+    signupSitesField.style.display=internal?'block':'none';
+    if(!internal){
+      document.querySelectorAll('input[name="signupSite"]').forEach(x=>x.checked=false);
+    }
+  }
+
+  signupBtn.addEventListener('click',()=>{
+    signupModal.style.display='flex';
+    signupMsg.textContent='';
+    signupMsg.style.color='var(--red)';
+    signupForm.reset();
+    document.querySelector('input[name="signupRole"][value="internal"]').checked=true;
+    syncSignupRoleUI();
+    signupFullName.focus();
+  });
+
+  signupCancel.addEventListener('click',()=>{
+    signupModal.style.display='none';
+    signupForm.reset();
+    syncSignupRoleUI();
+  });
+
+  document.querySelectorAll('input[name="signupRole"]').forEach(r=>{
+    r.addEventListener('change',syncSignupRoleUI);
+  });
+
   signupForm.addEventListener('submit',async e=>{
-    e.preventDefault(); signupMsg.textContent='Creating account…';
+    e.preventDefault();
+    signupMsg.style.color='var(--red)';
+    signupMsg.textContent='Creating account…';
+
     try{
-      const role=predefinedAuditors[signupFullName.value.trim()] || document.querySelector('input[name="signupRole"]:checked').value;
+      const role=document.querySelector('input[name="signupRole"]:checked')?.value || 'internal';
+      const fullName=signupFullName.value.trim();
+      const username=document.getElementById('signupUsername').value.trim();
+      const password=document.getElementById('signupPassword').value;
       const sites=[...document.querySelectorAll('input[name="signupSite"]:checked')].map(x=>x.value);
-      const body=await api('/api/signup',{method:'POST',body:JSON.stringify({full_name:signupFullName.value.trim(),username:document.getElementById('signupUsername').value.trim(),password:document.getElementById('signupPassword').value,role,sites})});
-      signupMsg.style.color='var(--green-deep)'; signupMsg.textContent='Account created successfully. You can now sign in.';
-      setTimeout(()=>{signupModal.style.display='none';signupForm.reset();document.getElementById('loginUsername').value=body.user.username;},800);
-    }catch(err){signupMsg.style.color='var(--red)';signupMsg.textContent=err.message||'Could not create account.';}
+
+      if(!fullName || !username || !password) throw new Error('Please complete all required fields.');
+      if(role==='internal' && sites.length===0){
+        throw new Error('Please select at least one assigned site for an Internal Auditor.');
+      }
+
+      const body=await api('/api/signup',{
+        method:'POST',
+        body:JSON.stringify({full_name:fullName,username,password,role,sites})
+      });
+
+      signupMsg.style.color='var(--green-deep)';
+      signupMsg.textContent=`Account created as ${role==='external'?'External':'Internal'} Auditor. You can now sign in.`;
+
+      // Refresh the auditor directory so the new name immediately appears
+      // in the Auditor dropdown after sign-in.
+      if(currentUser){
+        await refreshAuditorOptions();
+      }
+
+      setTimeout(()=>{
+        signupModal.style.display='none';
+        signupForm.reset();
+        syncSignupRoleUI();
+        document.getElementById('loginUsername').value=body.user.username;
+      },900);
+    }catch(err){
+      signupMsg.style.color='var(--red)';
+      signupMsg.textContent=err.message||'Could not create account.';
+    }
   });
 
   loginForm.addEventListener('submit',async e=>{
@@ -1351,7 +1721,9 @@ Continue with deletion?`))return;
     audit.meta.site = keepSite;
     const now = new Date();
     audit.meta.month = now.toISOString().slice(0,7);
+    applyUserAccess();
     fullRender();
+    refreshAuditorOptions().then(refreshLoadSelect);
   });
   elLoadSelect.addEventListener('change', e=> loadAudit(e.target.value));
 
@@ -1364,8 +1736,10 @@ Continue with deletion?`))return;
       audit.meta.org='Vidullanka PLC';
       audit.meta.month=new Date().toISOString().slice(0,7);
       applyUserAccess();
+      await refreshAuditorOptions();
       fullRender();
       applyUserAccess();
+      await refreshAuditorOptions();
       await refreshLoadSelect();
     }else{
       root.style.display='none';
