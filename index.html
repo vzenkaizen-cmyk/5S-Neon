@@ -265,6 +265,8 @@
   .add-plant-card p{margin:0 0 18px;color:var(--ink-soft);font-size:13px;}
   .plant-help{font-size:11.5px;color:var(--ink-soft);margin-top:5px;}
   #addPlantMsg{min-height:20px;margin-top:10px;font-size:12.5px;color:var(--red);}
+  #btnSaveProgress{border:1px solid #2F7A52;color:#2F7A52;background:#fff;}
+  #btnSaveProgress:hover{background:#eef7f1;}
   @media (max-width:640px){
     .plant-site-wrap{width:100%;}
   }
@@ -342,16 +344,16 @@
 
 <div id="addPlantModal">
   <div class="add-plant-card">
-    <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#2F7A52;font-weight:700;margin-bottom:6px;">Plant Site Management</div>
-    <h2>Add New Plant</h2>
-    <p>Add a new plant/site to the Plant Site list. Existing plants and their saved audits will remain unchanged.</p>
+    <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#2F7A52;font-weight:700;margin-bottom:6px;">Company Management</div>
+    <h2>Add New Company</h2>
+    <p>Add a new company/site to the Plant Site list. Existing companies, plants, and their saved audits will remain unchanged.</p>
     <form id="addPlantForm">
       <div class="auth-field">
-        <label for="newPlantName">Plant Name / Code</label>
-        <input id="newPlantName" maxlength="50" placeholder="e.g. ABC or NEW PLANT" required>
-        <div class="plant-help">Use a short unique plant code or name.</div>
+        <label for="newPlantName">Company Name / Code</label>
+        <input id="newPlantName" maxlength="50" placeholder="e.g. ABC or NEW COMPANY" required>
+        <div class="plant-help">Use a short unique company code or name.</div>
       </div>
-      <button id="addPlantSubmit" class="btn-primary" type="submit" style="width:100%;">Add Plant</button>
+      <button id="addPlantSubmit" class="btn-primary" type="submit" style="width:100%;">Add Company</button>
       <button id="addPlantCancel" class="btn-ghost" type="button" style="width:100%;margin-top:8px;">Cancel</button>
       <div id="addPlantMsg"></div>
     </form>
@@ -729,6 +731,28 @@
   }
   let audit = blankAudit();
 
+  // ---------------- Partial-save / auto-save state ----------------
+  let partialSaveTimer = null;
+  let partialSaveInFlight = false;
+  let partialSaveQueued = false;
+  let lastPartialSaveAt = 0;
+
+  function enteredMarkCount(){
+    const sectionMarks = Object.values(audit.scores || {}).filter(v => v !== undefined && v !== null && v !== '').length;
+    const q14Marks = Object.values((audit.q14 && audit.q14.score) || {}).filter(v => v !== undefined && v !== null && v !== '').length;
+    return sectionMarks + q14Marks;
+  }
+
+  function queuePartialSave(){
+    if(!currentUser || !audit.meta.site || !audit.meta.month) return;
+    partialSaveQueued = true;
+    clearTimeout(partialSaveTimer);
+    partialSaveTimer = setTimeout(async ()=>{
+      partialSaveQueued = false;
+      await savePartialAudit(false);
+    }, 1200);
+  }
+
   // ---------------- DOM refs ----------------
   const $ = sel => root.querySelector(sel);
   const elOrg = $('#f-org'), elSite = $('#f-site'), elDept = $('#f-dept'), elMonth = $('#f-month'), elAuditor = $('#f-auditor'), elAuditorOther = $('#f-auditor-other');
@@ -760,7 +784,7 @@
     elSite.innerHTML =
       '<option value="">— select site —</option>' +
       sites.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('') +
-      '<option value="__add_new__">＋ Add new plant…</option>';
+      '<option value="__add_new__">＋ Add Company…</option>';
     if(selectedSite && sites.includes(selectedSite)) elSite.value=selectedSite;
   }
 
@@ -840,6 +864,7 @@
       if(audit.sectionNotes[section.id]) notesArea.classList.add('show');
       notesArea.querySelector('textarea').addEventListener('input', e=>{
         audit.sectionNotes[section.id]=e.target.value;
+        queuePartialSave();
       });
       inner.appendChild(notesToggle);
       inner.appendChild(notesArea);
@@ -859,6 +884,7 @@
       audit.scores[key] = (audit.scores[key]===v) ? undefined : v; // click again to clear
       if(audit.scores[key]===undefined) delete audit.scores[key];
       refreshAll();
+      queuePartialSave();
     };
   }
 
@@ -936,11 +962,13 @@
       ta.addEventListener('input', ()=>{
         audit.q14.text[q.id]=ta.value;
         updWc();
+        queuePartialSave();
       });
       scoreInput.addEventListener('input', ()=>{
         let v = scoreInput.value==='' ? undefined : Math.max(0,Math.min(10, parseInt(scoreInput.value,10)||0));
         if(v===undefined){ delete audit.q14.score[q.id]; } else { audit.q14.score[q.id]=v; }
         refreshAll();
+        queuePartialSave();
       });
       inner.appendChild(wrap);
     });
@@ -970,7 +998,7 @@
       <textarea id="specialNote" style="width:100%;min-height:70px;margin-top:8px;font-family:inherit;font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;resize:vertical;">${audit.specialNote||''}</textarea>
     </div>`;
     bottomWrap.appendChild(noteCard);
-    noteCard.querySelector('#specialNote').addEventListener('input', e=>{ audit.specialNote = e.target.value; });
+    noteCard.querySelector('#specialNote').addEventListener('input', e=>{ audit.specialNote = e.target.value; queuePartialSave(); });
 
     const grand = document.createElement('div');
     grand.className='grandcard';
@@ -1012,12 +1040,19 @@
     saveCard.style.marginTop='14px';
     saveCard.innerHTML = `
       <div style="padding:16px 18px;">
-        <div style="background:#fff8e8;border:1px solid #e2c36b;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;">
-          <b>Important:</b> Do not click <b>Save Audit</b> until all marks, Q14 written responses, the Special Note by the Auditor, and the e-signature have been completed and checked.
+        <div style="background:#eef7f1;border:1px solid #a9cdb5;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;">
+          <b>Progress saving:</b> Your entered marks are automatically saved as a draft while you work. You can leave and return later using <b>Load Saved Audit</b>.
         </div>
-        <button class="btn-primary" id="btnSave" type="button" style="width:100%;">Save Audit</button>
+        <div style="background:#fff8e8;border:1px solid #e2c36b;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;">
+          <b>Final submission:</b> Use <b>Save Audit</b> only after all marks, Q14 written responses, the Special Note by the Auditor, and the e-signature have been completed and checked.
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-ghost" id="btnSaveProgress" type="button" style="flex:1;min-width:180px;">Save Progress</button>
+          <button class="btn-primary" id="btnSave" type="button" style="flex:1;min-width:180px;">Save Audit</button>
+        </div>
       </div>`;
     bottomWrap.appendChild(saveCard);
+    saveCard.querySelector('#btnSaveProgress').addEventListener('click', ()=>savePartialAudit(true));
     saveCard.querySelector('#btnSave').addEventListener('click', saveAudit);
     initSignaturePad();
   }
@@ -1083,6 +1118,7 @@
       ctx.closePath();
       audit.signature.dataUrl = canvas.toDataURL('image/png');
       audit.signature.signedAt = new Date().toISOString();
+      queuePartialSave();
 
       const status = document.getElementById('signatureStatus');
       if(status){
@@ -1192,10 +1228,11 @@
     }
     audit.meta.site=e.target.value;
     await refreshLoadSelect();
+    queuePartialSave();
     refreshAll();
   });
-  elDept.addEventListener('input', e=> audit.meta.dept=e.target.value);
-  elMonth.addEventListener('input', e=> audit.meta.month=e.target.value);
+  elDept.addEventListener('input', e=> { audit.meta.dept=e.target.value; queuePartialSave(); });
+  elMonth.addEventListener('input', e=> { audit.meta.month=e.target.value; queuePartialSave(); });
 
   function openAddPlantModal(){
     if(!currentUser){
@@ -1223,12 +1260,12 @@
 
   addPlantForm?.addEventListener('submit', async e=>{
     e.preventDefault();
-    const site=String(newPlantName.value||'').trim().toUpperCase().replace(/\\s+/g,' ');
+    const site=String(newPlantName.value||'').trim().toUpperCase().replace(/\s+/g,' ');
     addPlantMsg.style.color='var(--red)';
     addPlantMsg.textContent='';
 
     if(!site){
-      addPlantMsg.textContent='Please enter a plant name or code.';
+      addPlantMsg.textContent='Please enter a company name or code.';
       return;
     }
     if(site==='__ADD_NEW__'){
@@ -1236,7 +1273,7 @@
       return;
     }
     if(site.length<2){
-      addPlantMsg.textContent='Plant name/code must contain at least 2 characters.';
+      addPlantMsg.textContent='Company name/code must contain at least 2 characters.';
       return;
     }
 
@@ -1258,12 +1295,12 @@
 
       addPlantMsg.style.color='var(--green-deep)';
       addPlantMsg.textContent=`${site} added successfully.`;
-      showStatus(`${site} was added. You can now enter the audit marks for this plant.`);
+      showStatus(`${site} was added. You can now enter the audit marks for this company.`);
 
       setTimeout(closeAddPlantModal,500);
     }catch(err){
       console.error(err);
-      addPlantMsg.textContent='Could not add this plant on this device.';
+      addPlantMsg.textContent='Could not add this company on this device.';
     }
   });
 
@@ -1400,11 +1437,13 @@
     syncAuditorTypeFromSelection();
     applyAuditorSelection();
     refreshAll();
+    queuePartialSave();
   });
 
   elAuditorOther.addEventListener('input',()=>{
     applyAuditorSelection();
     refreshAll();
+    queuePartialSave();
   });
 
   [auditorInternal,auditorExternal].forEach(r=>{
@@ -1414,6 +1453,7 @@
         auditorInternal.checked=r.value==='internal';
         auditorExternal.checked=r.value==='external';
         refreshAll();
+        queuePartialSave();
       }
     });
   });
@@ -1454,7 +1494,7 @@
     elSite.innerHTML =
       '<option value="">— select site —</option>' +
       allowed.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('') +
-      '<option value="__add_new__">＋ Add new plant…</option>';
+      '<option value="__add_new__">＋ Add Company…</option>';
 
     if(selectedSite && allowed.includes(selectedSite)){
       elSite.value=selectedSite;
@@ -1597,6 +1637,63 @@
     }
   }
 
+  async function savePartialAudit(showMessage=true){
+    if(!currentUser){ if(showMessage) showStatus('Please sign in first.',true); return false; }
+    if(!audit.meta.site){ if(showMessage) showStatus('Please select a plant site before saving progress.',true); return false; }
+    if(!audit.meta.month){ if(showMessage) showStatus('Please choose an audit month before saving progress.',true); return false; }
+
+    const marksEntered = enteredMarkCount();
+    if(marksEntered===0){
+      if(showMessage) showStatus('No marks have been entered yet. Please enter at least one mark before saving progress.',true);
+      return false;
+    }
+
+    if(partialSaveInFlight){ return false; }
+    partialSaveInFlight=true;
+    applyAuditorSelection();
+    audit.savedAt = new Date().toISOString();
+    audit.meta.org='Vidullanka PLC';
+    audit.meta.saveStatus='partial';
+    audit.meta.lastSavedType='partial';
+    if(!audit.meta.auditor){
+      audit.meta.auditor=currentUser.full_name;
+      audit.meta.auditorType=currentUser.role==='external'?'external':'internal';
+    }
+
+    const overallTotal = SECTIONS.reduce((a,s)=>a+sectionTotal(s),0) + q14Total();
+    try{
+      const body=await api('/api/audits',{method:'POST',body:JSON.stringify({
+        site:audit.meta.site,
+        audit_month:audit.meta.month,
+        auditor:audit.meta.auditor,
+        auditor_type:audit.meta.auditorType,
+        audit,
+        overall_total:overallTotal
+      })});
+      audit.savedAt=body.audit?.saved_at||audit.savedAt;
+      lastPartialSaveAt=Date.now();
+      await refreshLoadSelect();
+      if(showMessage){
+        showStatus(`Progress saved for ${audit.meta.site} · ${audit.meta.month}. ${marksEntered} mark(s) saved. You can leave and continue later.`);
+      }
+      return true;
+    }catch(e){
+      console.error(e);
+      if(showMessage) showStatus('Could not save progress to database: '+e.message,true);
+      return false;
+    }finally{
+      partialSaveInFlight=false;
+    }
+  }
+
+  // If the auditor leaves the page/tab, try to save the latest draft. Normal
+  // autosaves already happen after changes, so this is an additional safety net.
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState==='hidden' && currentUser && audit.meta.site && audit.meta.month && enteredMarkCount()>0){
+      savePartialAudit(false);
+    }
+  });
+
   async function saveAudit(){
     // The existing /api/audits endpoint remains the persistence layer.
     // This frontend sends the newly added plant name in the same `site` field
@@ -1606,6 +1703,7 @@
     if(!audit.meta.site){ showStatus('Please select a plant site before saving.',true); elSite.focus(); return; }
     if(!audit.meta.month){ showStatus('Please choose an audit month before saving.',true); return; }
     applyAuditorSelection();
+    if(enteredMarkCount()===0){ showStatus('No marks have been entered yet. Please enter marks before saving the final audit.',true); return; }
     const missingScores=SECTIONS.flatMap(s=>s.items.map(([code])=>itemKey(s.id,code))).filter(k=>audit.scores[k]===undefined || audit.scores[k]===null || audit.scores[k]==='');
     if(missingScores.length){ showStatus(`Please enter marks for all 82 checklist questions. ${missingScores.length} mark(s) are still missing.`,true); return; }
     const missingQ14Scores=Q14.filter(q=>audit.q14.score[q.id]===undefined || audit.q14.score[q.id]===null || audit.q14.score[q.id]==='');
@@ -1616,6 +1714,8 @@
     if(!audit.signature || !audit.signature.dataUrl){ showStatus('Please provide the auditor e-signature before saving the final audit.',true); document.getElementById('signatureCanvas')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     const overallTotal = SECTIONS.reduce((a,s)=>a+sectionTotal(s),0) + q14Total();
     audit.savedAt = new Date().toISOString();
+    audit.meta.saveStatus='final';
+    audit.meta.lastSavedType='final';
     audit.meta.org='Vidullanka PLC';
     if(!audit.meta.auditor){
       audit.meta.auditor=currentUser.full_name;
