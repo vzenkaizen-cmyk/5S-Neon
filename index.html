@@ -259,7 +259,6 @@
   /* ---------- Add Plant ---------- */
   .plant-site-wrap{display:flex;gap:6px;align-items:center;}
   .plant-site-wrap select{flex:1;min-width:0;}
-  .add-plant-btn{white-space:nowrap;padding:8px 10px;font-size:12px;}
   #addPlantModal{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:20px;}
   .add-plant-card{width:min(430px,100%);background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.28);padding:26px;}
   .add-plant-card h2{font-family:'Source Serif 4',serif;margin:0 0 5px;font-size:25px;}
@@ -268,7 +267,6 @@
   #addPlantMsg{min-height:20px;margin-top:10px;font-size:12.5px;color:var(--red);}
   @media (max-width:640px){
     .plant-site-wrap{width:100%;}
-    .add-plant-btn{padding:8px 9px;}
   }
 
   /* ---------- Authentication ---------- */
@@ -390,7 +388,6 @@
         <select id="f-site">
           <option value="">— select site —</option>
         </select>
-        <button type="button" class="btn-ghost add-plant-btn" id="addPlantBtn" title="Add a new plant site">＋ Add Plant</button>
       </div>
     </div>
     <div class="field">
@@ -751,7 +748,6 @@
   const gaugeSvg = $('#gaugeSvg');
   const breakdownEl = $('#breakdown');
 
-  const addPlantBtn = document.getElementById('addPlantBtn');
   const addPlantModal = document.getElementById('addPlantModal');
   const addPlantForm = document.getElementById('addPlantForm');
   const addPlantCancel = document.getElementById('addPlantCancel');
@@ -1219,7 +1215,6 @@
     addPlantMsg.textContent='';
   }
 
-  addPlantBtn?.addEventListener('click', openAddPlantModal);
   addPlantCancel?.addEventListener('click', closeAddPlantModal);
 
   addPlantModal?.addEventListener('click', e=>{
