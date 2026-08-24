@@ -290,6 +290,20 @@
   .auditor-type label{font-size:12px;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:5px;}
   .auditor-type input{accent-color:var(--green);}
   .readonly-field{background:#eef2ed !important;font-weight:600;}
+  .audit-locked-banner{
+    margin:0 28px 12px;
+    padding:11px 14px;
+    background:#eef7f1;
+    border:1px solid #a9cdb5;
+    border-radius:8px;
+    color:#1F5A3B;
+    font-size:13px;
+    font-weight:600;
+  }
+  .audit-locked .pill{cursor:not-allowed;opacity:.85;}
+  .audit-locked textarea,.audit-locked input,.audit-locked select{background:#eef2ed !important;}
+  .audit-locked .signature-pad-wrap{opacity:.85;}
+
   @media (max-width: 640px) {
   .mast-brand {
     position: static;
@@ -360,9 +374,24 @@
   </div>
 </div>
 
+<div id="monthlyReportModal" style="display:none;position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:20px;">
+  <div class="auth-card" style="max-width:520px;">
+    <h2 style="font-size:24px;">Monthly 5S Audit Summary</h2>
+    <p>Select a month to generate a read-only summary report for all accessible plants.</p>
+    <div class="auth-field">
+      <label for="reportMonth">Audit Month</label>
+      <input id="reportMonth" type="month">
+    </div>
+    <div id="monthlyReportMsg" style="min-height:20px;margin-top:8px;font-size:12.5px;color:var(--red);"></div>
+    <button id="downloadMonthlyReport" class="btn-primary" type="button" style="width:100%;">Download Monthly Summary (Excel)</button>
+    <button id="closeMonthlyReport" class="btn-ghost" type="button" style="width:100%;margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
 <div id="jasteca-root" style="display:none;">
   <nav class="navbar" id="mainNav">
     <a href="/" class="active">Audit</a>
+    <a href="#" id="navMonthlyReportLink" style="display:none;">📊 Monthly Report</a>
     <a href="/admin.html" id="navAdminLink" style="display:none;">Admin</a>
   </nav>
   <div class="mast">
@@ -744,6 +773,7 @@
   }
 
   function queuePartialSave(){
+    if(isFinalAuditLocked()) return;
     if(!currentUser || !audit.meta.site || !audit.meta.month) return;
     partialSaveQueued = true;
     clearTimeout(partialSaveTimer);
@@ -771,6 +801,13 @@
   const gaugeBand = $('#gaugeBand');
   const gaugeSvg = $('#gaugeSvg');
   const breakdownEl = $('#breakdown');
+
+  const navMonthlyReportLink = document.getElementById('navMonthlyReportLink');
+  const monthlyReportModal = document.getElementById('monthlyReportModal');
+  const reportMonth = document.getElementById('reportMonth');
+  const monthlyReportMsg = document.getElementById('monthlyReportMsg');
+  const downloadMonthlyReport = document.getElementById('downloadMonthlyReport');
+  const closeMonthlyReport = document.getElementById('closeMonthlyReport');
 
   const addPlantModal = document.getElementById('addPlantModal');
   const addPlantForm = document.getElementById('addPlantForm');
@@ -863,6 +900,7 @@
       });
       if(audit.sectionNotes[section.id]) notesArea.classList.add('show');
       notesArea.querySelector('textarea').addEventListener('input', e=>{
+        if(isFinalAuditLocked()) return;
         audit.sectionNotes[section.id]=e.target.value;
         queuePartialSave();
       });
@@ -879,6 +917,10 @@
     sectionsWrap.onclick = e=>{
       const pill = e.target.closest('.pill');
       if(!pill) return;
+      if(isFinalAuditLocked()){
+        showStatus('This audit is already saved and locked. Marks cannot be changed.', true);
+        return;
+      }
       const key = pill.dataset.key;
       const v = parseInt(pill.dataset.v,10);
       audit.scores[key] = (audit.scores[key]===v) ? undefined : v; // click again to clear
@@ -960,11 +1002,13 @@
       }
       updWc();
       ta.addEventListener('input', ()=>{
+        if(isFinalAuditLocked()) return;
         audit.q14.text[q.id]=ta.value;
         updWc();
         queuePartialSave();
       });
       scoreInput.addEventListener('input', ()=>{
+        if(isFinalAuditLocked()) return;
         let v = scoreInput.value==='' ? undefined : Math.max(0,Math.min(10, parseInt(scoreInput.value,10)||0));
         if(v===undefined){ delete audit.q14.score[q.id]; } else { audit.q14.score[q.id]=v; }
         refreshAll();
@@ -1220,6 +1264,7 @@
     if(auditorExternal) auditorExternal.checked = audit.meta.auditorType === 'external';
   }
   elSite.addEventListener('change', async e=>{
+    if(isFinalAuditLocked()) return;
     if(e.target.value==='__add_new__'){
       const previousSite=audit.meta.site||'';
       e.target.value=previousSite;
@@ -1231,8 +1276,8 @@
     queuePartialSave();
     refreshAll();
   });
-  elDept.addEventListener('input', e=> { audit.meta.dept=e.target.value; queuePartialSave(); });
-  elMonth.addEventListener('input', e=> { audit.meta.month=e.target.value; queuePartialSave(); });
+  elDept.addEventListener('input', e=> { if(isFinalAuditLocked()) return; audit.meta.dept=e.target.value; queuePartialSave(); });
+  elMonth.addEventListener('input', e=> { if(isFinalAuditLocked()) return; audit.meta.month=e.target.value; queuePartialSave(); });
 
   function openAddPlantModal(){
     if(!currentUser){
@@ -1309,6 +1354,7 @@
     renderSections();
     renderBottom();
     refreshAll();
+    applyLockState();
   }
 
   // ---------------- Neon PostgreSQL API storage ----------------
@@ -1434,6 +1480,7 @@
   }
 
   elAuditor.addEventListener('change',()=>{
+    if(isFinalAuditLocked()) return;
     syncAuditorTypeFromSelection();
     applyAuditorSelection();
     refreshAll();
@@ -1441,6 +1488,7 @@
   });
 
   elAuditorOther.addEventListener('input',()=>{
+    if(isFinalAuditLocked()) return;
     applyAuditorSelection();
     refreshAll();
     queuePartialSave();
@@ -1448,6 +1496,7 @@
 
   [auditorInternal,auditorExternal].forEach(r=>{
     r?.addEventListener('change',()=>{
+      if(isFinalAuditLocked()) return;
       if(elAuditor.value==='__other__'){
         audit.meta.auditorType=r.value;
         auditorInternal.checked=r.value==='internal';
@@ -1457,6 +1506,50 @@
       }
     });
   });
+
+  function isFinalAuditLocked(){
+    return String(audit?.meta?.saveStatus || '').toLowerCase() === 'final';
+  }
+
+  function applyLockState(){
+    const locked = isFinalAuditLocked();
+    root.classList.toggle('audit-locked', locked);
+
+    // Editing controls
+    [elSite, elDept, elMonth, elAuditor, elAuditorOther, auditorInternal, auditorExternal]
+      .forEach(el=>{ if(el) el.disabled = locked || (el===auditorInternal || el===auditorExternal ? el.disabled : false); });
+
+    sectionsWrap.querySelectorAll('.pill').forEach(p=>{ p.style.pointerEvents = locked ? 'none' : ''; });
+    sectionsWrap.querySelectorAll('textarea').forEach(t=>{ t.disabled = locked; });
+    bottomWrap.querySelectorAll('textarea, input[type="number"]').forEach(x=>{ x.disabled = locked; });
+
+    const sigCanvas=document.getElementById('signatureCanvas');
+    if(sigCanvas) sigCanvas.style.pointerEvents = locked ? 'none' : '';
+    const clearSig=document.getElementById('btnClearSignature');
+    if(clearSig) clearSig.disabled = locked;
+
+    const saveProgress=document.getElementById('btnSaveProgress');
+    const saveBtn=document.getElementById('btnSave');
+    if(saveProgress) saveProgress.disabled = locked;
+    if(saveBtn) saveBtn.disabled = locked;
+
+    const deleteBtn=document.getElementById('btnDelete');
+    if(deleteBtn) deleteBtn.disabled = locked;
+
+    const bannerId='auditLockedBanner';
+    let banner=document.getElementById(bannerId);
+    if(locked){
+      if(!banner){
+        banner=document.createElement('div');
+        banner.id=bannerId;
+        banner.className='audit-locked-banner';
+        banner.textContent='🔒 Final audit saved. Marks and audit details are locked and cannot be edited. You can only view or download this audit.';
+        root.insertBefore(banner, document.querySelector('#jasteca-root .metabar'));
+      }
+    }else if(banner){
+      banner.remove();
+    }
+  }
 
   function applyUserAccess(){
     if(!currentUser) return;
@@ -1470,6 +1563,10 @@
     sessionUser.textContent = `${currentUser.full_name} · ${roleLabel}`;
     const navAdminLink = document.getElementById('navAdminLink');
     if(navAdminLink) navAdminLink.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
+    if(navMonthlyReportLink){
+      const canViewReport = currentUser.role === 'external' || currentUser.role === 'admin';
+      navMonthlyReportLink.style.display = canViewReport ? 'inline-block' : 'none';
+    }
     elOrg.value = 'Vidullanka PLC';
     audit.meta.org = 'Vidullanka PLC';
 
@@ -1615,6 +1712,7 @@
 
       fullRender();
       applyUserAccess();
+      applyLockState();
       await refreshAuditorOptions();
 
       // refreshAuditorOptions can sync the saved auditor/type if it is in the directory.
@@ -1638,6 +1736,10 @@
   }
 
   async function savePartialAudit(showMessage=true){
+    if(isFinalAuditLocked()){
+      if(showMessage) showStatus('This audit is already finalized and locked.', true);
+      return false;
+    }
     if(!currentUser){ if(showMessage) showStatus('Please sign in first.',true); return false; }
     if(!audit.meta.site){ if(showMessage) showStatus('Please select a plant site before saving progress.',true); return false; }
     if(!audit.meta.month){ if(showMessage) showStatus('Please choose an audit month before saving progress.',true); return false; }
@@ -1695,6 +1797,10 @@
   });
 
   async function saveAudit(){
+    if(isFinalAuditLocked()){
+      showStatus('This audit is already finalized and locked. It cannot be saved again.', true);
+      return;
+    }
     // The existing /api/audits endpoint remains the persistence layer.
     // This frontend sends the newly added plant name in the same `site` field
     // as every existing plant, so the backend must allow non-hardcoded site
@@ -1731,12 +1837,19 @@
         overall_total:overallTotal
       })});
       audit.savedAt=body.audit?.saved_at||audit.savedAt;
+      audit.meta.saveStatus='final';
+      audit.meta.lastSavedType='final';
+      applyLockState();
       await refreshLoadSelect();
-      showStatus(`Saved ${audit.meta.site} · ${audit.meta.month} to Neon PostgreSQL.`);
+      showStatus(`Saved ${audit.meta.site} · ${audit.meta.month} to Neon PostgreSQL. 🔒 Marks are now locked and cannot be edited.`);
     }catch(e){console.error(e);showStatus('Could not save to database: '+e.message,true);}
   }
 
   async function deleteAudit(){
+    if(isFinalAuditLocked()){
+      showStatus('Finalized audits cannot be deleted from the audit screen.', true);
+      return;
+    }
     const site=audit.meta.site, month=audit.meta.month;
     if(!site || !month){showStatus('Nothing to delete.',true);return;}
     if(!confirm(`WARNING: You are about to permanently delete the saved audit for ${site} · ${month}.
@@ -1858,6 +1971,101 @@ Continue with deletion?`))return;
     try{await api('/api/logout',{method:'POST'});}catch(_e){}
     currentUser=null; dbReady=false; root.style.display='none'; authScreen.style.display='flex'; loginForm.reset(); document.getElementById('loginUsername').focus();
   });
+
+  // ---------------- Monthly summary report ----------------
+  function reportStatus(pct){
+    if(pct >= 85) return 'Excellent';
+    if(pct >= 75) return 'Good';
+    if(pct >= 65) return 'Needs Improvement';
+    return 'Critical';
+  }
+
+  async function downloadMonthlySummary(){
+    if(!currentUser || !['external','admin'].includes(currentUser.role)){
+      monthlyReportMsg.textContent='Only External Auditors and Administrators can download the monthly report.';
+      return;
+    }
+    const month=reportMonth.value;
+    if(!month){
+      monthlyReportMsg.textContent='Please select an audit month.';
+      return;
+    }
+    monthlyReportMsg.style.color='var(--ink-soft)';
+    monthlyReportMsg.textContent='Preparing report…';
+    try{
+      const list=await getAuditsForSite('');
+      const monthRows=(list||[])
+        .filter(x=>String(x.audit_month||'')===month)
+        .sort((a,b)=>String(a.site||'').localeCompare(String(b.site||'')));
+
+      if(!monthRows.length){
+        monthlyReportMsg.style.color='var(--red)';
+        monthlyReportMsg.textContent='No audit records were found for the selected month.';
+        return;
+      }
+
+      const MAX=GRAND_MAX+Q14_MAX;
+      const rows=[
+        ['Vidullanka PLC — 5S Monthly Audit Summary'],
+        ['Audit Month',month],
+        ['Generated At',new Date().toLocaleString()],
+        [],
+        ['Plant','Auditor','Auditor Type','Score','Maximum Score','Percentage','Status']
+      ];
+
+      let totalPct=0;
+      monthRows.forEach(x=>{
+        const score=Number(x.overall_total||0);
+        const pct=MAX ? (score/MAX)*100 : 0;
+        totalPct+=pct;
+        rows.push([
+          x.site||'',
+          x.auditor||'',
+          String(x.auditor_type||'').toLowerCase()==='external'?'External Auditor':'Internal Auditor',
+          score,
+          MAX,
+          Number(pct.toFixed(1)),
+          reportStatus(pct)
+        ]);
+      });
+
+      const avg=totalPct/monthRows.length;
+      rows.push([]);
+      rows.push(['Monthly Summary']);
+      rows.push(['Plants Audited',monthRows.length]);
+      rows.push(['Average Score (%)',Number(avg.toFixed(1))]);
+      rows.push(['Highest Performing Plant',monthRows.slice().sort((a,b)=>Number(b.overall_total||0)-Number(a.overall_total||0))[0]?.site||'']);
+      rows.push(['Lowest Performing Plant',monthRows.slice().sort((a,b)=>Number(a.overall_total||0)-Number(b.overall_total||0))[0]?.site||'']);
+      rows.push(['Plants Below 75%',monthRows.filter(x=>(Number(x.overall_total||0)/MAX*100)<75).length]);
+
+      const ws=XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols']=[{wch:16},{wch:28},{wch:18},{wch:12},{wch:14},{wch:14},{wch:22}];
+      const wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'Monthly Summary');
+      const fname=`5S-Monthly-Audit-Summary-${month}.xlsx`;
+      XLSX.writeFile(wb,fname);
+      monthlyReportMsg.style.color='var(--green-deep)';
+      monthlyReportMsg.textContent=`Downloaded ${fname}`;
+    }catch(e){
+      console.error(e);
+      monthlyReportMsg.style.color='var(--red)';
+      monthlyReportMsg.textContent='Could not generate the monthly report: '+e.message;
+    }
+  }
+
+  navMonthlyReportLink?.addEventListener('click',e=>{
+    e.preventDefault();
+    if(!currentUser || !['external','admin'].includes(currentUser.role)) return;
+    reportMonth.value=new Date().toISOString().slice(0,7);
+    monthlyReportMsg.textContent='';
+    monthlyReportMsg.style.color='var(--red)';
+    monthlyReportModal.style.display='flex';
+  });
+  closeMonthlyReport?.addEventListener('click',()=>{ monthlyReportModal.style.display='none'; });
+  monthlyReportModal?.addEventListener('click',e=>{
+    if(e.target===monthlyReportModal) monthlyReportModal.style.display='none';
+  });
+  downloadMonthlyReport?.addEventListener('click',downloadMonthlySummary);
 
   // ---------------- Export to Excel ----------------
   function exportToExcel(){
