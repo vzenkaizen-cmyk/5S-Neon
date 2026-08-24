@@ -242,6 +242,71 @@
   .savedrow:last-child{border-bottom:none;}
   .savedrow .meta{color:var(--ink-soft); font-size:11.5px;}
 
+  /* ---------- Monthly performance report ---------- */
+  .monthly-report-overlay{
+    position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,.58);
+    align-items:center;justify-content:center;padding:18px;
+  }
+  .monthly-report-shell{
+    width:min(1180px,100%);max-height:94vh;overflow:auto;background:var(--paper);
+    border-radius:14px;box-shadow:0 24px 90px rgba(0,0,0,.35);
+  }
+  .monthly-report-header{
+    background:var(--ink);color:#fff;padding:22px 26px;display:flex;
+    justify-content:space-between;align-items:flex-start;gap:18px;border-bottom:4px solid var(--green);
+  }
+  .monthly-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:#9FCBB2;margin-bottom:4px;}
+  .monthly-report-header h2{font-family:'Source Serif 4',serif;font-size:27px;margin:0 0 4px;}
+  .monthly-report-header p{margin:0;color:#C8CDD6;font-size:12.5px;max-width:760px;}
+  .monthly-close{background:#fff;color:var(--ink);white-space:nowrap;}
+  .monthly-toolbar{
+    background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;
+    display:flex;align-items:flex-end;gap:9px;flex-wrap:wrap;
+  }
+  .monthly-month-field{display:flex;flex-direction:column;gap:4px;min-width:180px;}
+  .monthly-month-field label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;}
+  .monthly-month-field input{font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fdfdfb;}
+  .monthly-report-msg{min-height:18px;padding:8px 22px 0;font-size:12px;font-weight:600;color:var(--ink-soft);}
+  .monthly-dashboard{padding:14px 22px 28px;}
+  .monthly-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px;}
+  .monthly-kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:15px 16px;}
+  .monthly-kpi .k-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;}
+  .monthly-kpi .k-value{font-family:'Source Serif 4',serif;font-size:26px;font-weight:700;margin-top:2px;}
+  .monthly-kpi .k-help{font-size:11px;color:var(--ink-soft);margin-top:1px;}
+  .monthly-card{background:#fff;border:1px solid var(--line);border-radius:10px;margin-top:14px;overflow:hidden;}
+  .monthly-card-head{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .monthly-card-head h3{font-family:'Source Serif 4',serif;font-size:17px;margin:0;}
+  .monthly-card-head span{font-size:11px;color:var(--ink-soft);}
+  .monthly-table-wrap{overflow:auto;}
+  .monthly-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px;}
+  .monthly-table th{background:#F5F7F2;color:var(--ink-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .monthly-table td{padding:9px 11px;border-bottom:1px solid #EEF0EB;vertical-align:middle;}
+  .monthly-table tr:last-child td{border-bottom:none;}
+  .monthly-table .num{text-align:right;font-family:'IBM Plex Mono',monospace;}
+  .monthly-score{font-family:'IBM Plex Mono',monospace;font-weight:700;}
+  .monthly-progress{height:7px;background:#ECEFE9;border-radius:5px;overflow:hidden;min-width:110px;}
+  .monthly-progress > span{display:block;height:100%;border-radius:5px;background:var(--green);}
+  .monthly-status{display:inline-flex;padding:3px 8px;border-radius:12px;font-size:10.5px;font-weight:700;white-space:nowrap;}
+  .monthly-status.completed{background:#E4EFE7;color:#1F5A3B;}
+  .monthly-status.partial{background:#FFF3D8;color:#8A641A;}
+  .monthly-status.pending{background:#FBEDEA;color:#9A4332;}
+  .monthly-status.unknown{background:#EEF1F3;color:#4B5563;}
+  .monthly-trend-up{font-weight:700;color:#2F7A52;}
+  .monthly-trend-down{font-weight:700;color:#B5533C;}
+  .monthly-trend-flat{font-weight:700;color:#7A6B45;}
+  .monthly-empty{padding:22px;text-align:center;color:var(--ink-soft);font-size:13px;}
+  .monthly-note{padding:10px 14px;background:#F7F8F5;border-top:1px solid var(--line);font-size:11px;color:var(--ink-soft);}
+  @media (max-width:850px){
+    .monthly-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .monthly-report-header{padding:18px;}
+    .monthly-dashboard,.monthly-toolbar{padding-left:16px;padding-right:16px;}
+  }
+  @media (max-width:560px){
+    .monthly-kpis{grid-template-columns:1fr;}
+    .monthly-report-header{flex-direction:column;}
+    .monthly-close{align-self:flex-end;}
+  }
+
   @media (max-width: 640px){
   .mast{padding:16px 16px 60px;}
   .mast-brand{position:static; margin-top:12px; justify-content:flex-start;}
@@ -374,17 +439,28 @@
   </div>
 </div>
 
-<div id="monthlyReportModal" style="display:none;position:fixed;inset:0;z-index:10002;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:20px;">
-  <div class="auth-card" style="max-width:520px;">
-    <h2 style="font-size:24px;">Monthly 5S Audit Summary</h2>
-    <p>Select a month to generate a read-only summary report for all accessible plants.</p>
-    <div class="auth-field">
-      <label for="reportMonth">Audit Month</label>
-      <input id="reportMonth" type="month">
+<div id="monthlyReportModal" class="monthly-report-overlay" style="display:none;">
+  <div class="monthly-report-shell">
+    <div class="monthly-report-header">
+      <div>
+        <div class="monthly-eyebrow">VIDULLANKA PLC · 5S PERFORMANCE</div>
+        <h2>Monthly 5S Audit Performance</h2>
+        <p>Read-only management view of audit completion and plant performance. No audit marks can be changed from this report.</p>
+      </div>
+      <button id="closeMonthlyReport" class="btn-ghost monthly-close" type="button">Close</button>
     </div>
-    <div id="monthlyReportMsg" style="min-height:20px;margin-top:8px;font-size:12.5px;color:var(--red);"></div>
-    <button id="downloadMonthlyReport" class="btn-primary" type="button" style="width:100%;">Download Monthly Summary (Excel)</button>
-    <button id="closeMonthlyReport" class="btn-ghost" type="button" style="width:100%;margin-top:8px;">Cancel</button>
+
+    <div class="monthly-toolbar">
+      <div class="monthly-month-field">
+        <label for="reportMonth">Audit Month</label>
+        <input id="reportMonth" type="month">
+      </div>
+      <button id="refreshMonthlyReport" class="btn-ghost" type="button">↻ Refresh</button>
+      <button id="downloadMonthlyReport" class="btn-primary" type="button">Download Excel</button>
+    </div>
+
+    <div id="monthlyReportMsg" class="monthly-report-msg"></div>
+    <div id="monthlyReportDashboard"></div>
   </div>
 </div>
 
@@ -1972,12 +2048,266 @@ Continue with deletion?`))return;
     currentUser=null; dbReady=false; root.style.display='none'; authScreen.style.display='flex'; loginForm.reset(); document.getElementById('loginUsername').focus();
   });
 
-  // ---------------- Monthly summary report ----------------
+  // ---------------- Monthly performance report ----------------
   function reportStatus(pct){
     if(pct >= 85) return 'Excellent';
     if(pct >= 75) return 'Good';
     if(pct >= 65) return 'Needs Improvement';
     return 'Critical';
+  }
+
+  function reportRecordState(row){
+    const raw = String(
+      row?.save_status ??
+      row?.status ??
+      row?.audit_status ??
+      row?.audit?.meta?.saveStatus ??
+      row?.audit?.meta?.lastSavedType ??
+      ''
+    ).toLowerCase();
+    if(raw === 'final' || raw === 'completed' || raw === 'complete') return 'completed';
+    if(raw === 'partial' || raw === 'draft' || raw === 'in_progress') return 'partial';
+    return 'unknown';
+  }
+
+  function reportRecordTime(row){
+    return new Date(
+      row?.saved_at || row?.updated_at || row?.created_at ||
+      row?.audit?.savedAt || 0
+    ).getTime() || 0;
+  }
+
+  function chooseBestReportRecord(a,b){
+    if(!a) return b;
+    if(!b) return a;
+    const sa=reportRecordState(a), sb=reportRecordState(b);
+    if(sa==='completed' && sb!=='completed') return a;
+    if(sb==='completed' && sa!=='completed') return b;
+    return reportRecordTime(b)>=reportRecordTime(a) ? b : a;
+  }
+
+  function reportPct(row, max){
+    const score=Number(row?.overall_total||0);
+    return max ? Math.max(0,Math.min(100,(score/max)*100)) : 0;
+  }
+
+  function reportMonthLabel(month){
+    if(!month) return '';
+    const d=new Date(month+'-01T00:00:00');
+    return Number.isNaN(d.getTime()) ? month :
+      d.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  }
+
+  function reportTrend(site, month, recordsBySiteMonth, months){
+    const idx=months.indexOf(month);
+    if(idx<1) return {symbol:'—', cls:'monthly-trend-flat', text:'No prior month'};
+    const cur=recordsBySiteMonth.get(site+'|'+month);
+    let prev=null;
+    for(let i=idx-1;i>=0;i--){
+      prev=recordsBySiteMonth.get(site+'|'+months[i]);
+      if(prev) break;
+    }
+    if(!cur || !prev) return {symbol:'—', cls:'monthly-trend-flat', text:'No prior score'};
+    const max=GRAND_MAX+Q14_MAX;
+    const diff=reportPct(cur,max)-reportPct(prev,max);
+    if(Math.abs(diff)<0.5) return {symbol:'→', cls:'monthly-trend-flat', text:'Stable'};
+    return diff>0
+      ? {symbol:'↑', cls:'monthly-trend-up', text:`+${diff.toFixed(1)} pp`}
+      : {symbol:'↓', cls:'monthly-trend-down', text:`${diff.toFixed(1)} pp`};
+  }
+
+  function reportRecordMap(list){
+    const map=new Map();
+    (list||[]).forEach(row=>{
+      const site=String(row?.site||'').trim();
+      const month=String(row?.audit_month||'').trim();
+      if(!site || !month) return;
+      const key=site+'|'+month;
+      map.set(key,chooseBestReportRecord(map.get(key),row));
+    });
+    return map;
+  }
+
+  function monthlyReportDashboardHtml(list, month){
+    const MAX=GRAND_MAX+Q14_MAX;
+    const allSites=[...new Set(getAllSites().map(s=>String(s).trim()).filter(Boolean))].sort();
+    const map=reportRecordMap(list);
+    const monthRecords=allSites.map(site=>map.get(site+'|'+month)).filter(Boolean);
+    const recordedCount=monthRecords.length;
+    const completedCount=monthRecords.filter(x=>reportRecordState(x)==='completed').length;
+    const partialCount=monthRecords.filter(x=>reportRecordState(x)==='partial').length;
+    const pendingCount=Math.max(0,allSites.length-recordedCount);
+    const scoreRows=monthRecords.filter(x=>Number.isFinite(Number(x.overall_total)));
+    const avg=scoreRows.length
+      ? scoreRows.reduce((s,x)=>s+reportPct(x,MAX),0)/scoreRows.length : 0;
+    const ranked=scoreRows.slice().sort((a,b)=>Number(b.overall_total||0)-Number(a.overall_total||0));
+    const below75=scoreRows.filter(x=>reportPct(x,MAX)<75).length;
+
+    const historicalMonths=[...new Set(
+      [...map.keys()].map(k=>k.split('|').slice(1).join('|')).filter(Boolean)
+    )].sort();
+
+    const currentIdx=historicalMonths.indexOf(month);
+    const monthsForHistory=historicalMonths.length>12
+      ? historicalMonths.slice(Math.max(0,historicalMonths.length-12))
+      : historicalMonths;
+
+    const historyRows=allSites.map(site=>{
+      const vals=monthsForHistory.map(m=>map.get(site+'|'+m));
+      const scores=vals.filter(Boolean).map(x=>reportPct(x,MAX));
+      return {site, vals, scores};
+    }).filter(r=>r.vals.some(Boolean));
+
+    let html=`<div class="monthly-dashboard">`;
+
+    html+=`
+      <div class="monthly-kpis">
+        <div class="monthly-kpi">
+          <div class="k-label">Plants Audited</div>
+          <div class="k-value">${recordedCount} / ${allSites.length}</div>
+          <div class="k-help">${completedCount} final · ${partialCount} partial · ${pendingCount} pending</div>
+        </div>
+        <div class="monthly-kpi">
+          <div class="k-label">Average Score</div>
+          <div class="k-value">${scoreRows.length ? avg.toFixed(1)+'%' : '—'}</div>
+          <div class="k-help">${reportMonthLabel(month)}</div>
+        </div>
+        <div class="monthly-kpi">
+          <div class="k-label">Highest Plant</div>
+          <div class="k-value">${ranked[0]?.site || '—'}</div>
+          <div class="k-help">${ranked[0] ? reportPct(ranked[0],MAX).toFixed(1)+'%' : 'No score recorded'}</div>
+        </div>
+        <div class="monthly-kpi">
+          <div class="k-label">Below 75%</div>
+          <div class="k-value">${below75}</div>
+          <div class="k-help">Plants needing attention</div>
+        </div>
+      </div>`;
+
+    html+=`
+      <div class="monthly-card">
+        <div class="monthly-card-head">
+          <h3>Audit Completion &amp; Plant Performance — ${escHtml(reportMonthLabel(month))}</h3>
+          <span>Read-only · marks are not editable here</span>
+        </div>
+        <div class="monthly-table-wrap">
+          <table class="monthly-table">
+            <thead><tr>
+              <th>Plant</th><th>Completion</th><th class="num">Score</th><th>Performance</th><th>Status</th><th>Auditor</th>
+            </tr></thead><tbody>`;
+
+    if(!allSites.length){
+      html+=`<tr><td colspan="6" class="monthly-empty">No plant sites are configured.</td></tr>`;
+    }else{
+      allSites.forEach(site=>{
+        const row=map.get(site+'|'+month);
+        const state=row ? reportRecordState(row) : 'pending';
+        const pct=row ? reportPct(row,MAX) : 0;
+        const stateLabel=state==='completed'?'Completed':state==='partial'?'Partial Save':state==='unknown'?'Recorded':'Not Recorded';
+        const stateClass=state==='completed'?'completed':state==='partial'?'partial':state==='pending'?'pending':'unknown';
+        const score=row ? `${Number(row.overall_total||0)} / ${MAX}` : '—';
+        html+=`<tr>
+          <td><strong>${escHtml(site)}</strong></td>
+          <td><span class="monthly-status ${stateClass}">${stateLabel}</span></td>
+          <td class="num"><span class="monthly-score">${score}</span></td>
+          <td>${row ? `<div style="display:flex;align-items:center;gap:9px;"><span style="min-width:45px;font-family:'IBM Plex Mono',monospace;font-weight:700;">${pct.toFixed(1)}%</span><div class="monthly-progress"><span style="width:${pct.toFixed(1)}%"></span></div></div>` : '<span style="color:var(--ink-soft);">Pending</span>'}</td>
+          <td>${row ? `<span class="monthly-status ${pct>=85?'completed':pct>=75?'unknown':pct>=65?'partial':'pending'}">${reportStatus(pct)}</span>` : '<span class="monthly-status pending">Pending</span>'}</td>
+          <td>${row ? escHtml(row.auditor||'—') : '—'}</td>
+        </tr>`;
+      });
+    }
+    html+=`</tbody></table>
+        </div>
+        <div class="monthly-note">This section is the monthly completion check. A plant with no record is shown as <strong>Not Recorded</strong>. A partial save is shown separately so you can identify audits that have been started but not finalized.</div>
+      </div>`;
+
+    html+=`
+      <div class="monthly-card">
+        <div class="monthly-card-head">
+          <h3>Plant Performance by Month</h3>
+          <span>${monthsForHistory.length ? `Showing ${monthsForHistory.length} month(s)` : 'No historical audit records yet'}</span>
+        </div>
+        <div class="monthly-table-wrap">`;
+
+    if(!historyRows.length){
+      html+=`<div class="monthly-empty">No saved audit history is available yet.</div>`;
+    }else{
+      html+=`<table class="monthly-table" style="min-width:${Math.max(760,220+monthsForHistory.length*105)}px;">
+        <thead><tr><th>Plant</th>`;
+      monthsForHistory.forEach(m=>{
+        html+=`<th>${escHtml(reportMonthLabel(m))}</th>`;
+      });
+      html+=`<th>Latest Trend</th></tr><tbody>`;
+
+      historyRows.forEach(r=>{
+        html+=`<tr><td><strong>${escHtml(r.site)}</strong></td>`;
+        r.vals.forEach((x,i)=>{
+          if(!x){
+            html+='<td><span style="color:var(--ink-soft);">—</span></td>';
+          }else{
+            const pct=reportPct(x,MAX);
+            const state=reportRecordState(x);
+            const suffix=state==='partial'?' *':'';
+            html+=`<td><span class="monthly-score">${pct.toFixed(1)}%${suffix}</span></td>`;
+          }
+        });
+        const trend=reportTrend(r.site,month,map,historicalMonths);
+        html+=`<td><span class="${trend.cls}">${trend.symbol} ${escHtml(trend.text)}</span></td></tr>`;
+      });
+      html+=`</tbody></table>`;
+    }
+    html+=`</div>
+      <div class="monthly-note">Percentage = overall audit score ÷ ${MAX} × 100. “—” means no audit record was found for that plant and month. An asterisk (*) indicates the available record is a partial save.</div>
+      </div>`;
+
+    if(ranked.length){
+      html+=`
+      <div class="monthly-card">
+        <div class="monthly-card-head">
+          <h3>${escHtml(reportMonthLabel(month))} Plant Ranking</h3>
+          <span>Highest to lowest overall score</span>
+        </div>
+        <div class="monthly-table-wrap">
+          <table class="monthly-table">
+            <thead><tr><th>Rank</th><th>Plant</th><th class="num">Score</th><th>Percentage</th><th>Status</th></tr></thead>
+            <tbody>`;
+      ranked.forEach((row,i)=>{
+        const pct=reportPct(row,MAX);
+        html+=`<tr><td class="num">${i+1}</td><td><strong>${escHtml(row.site||'')}</strong></td><td class="num">${Number(row.overall_total||0)} / ${MAX}</td><td>${pct.toFixed(1)}%</td><td><span class="monthly-status ${pct>=85?'completed':pct>=75?'unknown':pct>=65?'partial':'pending'}">${reportStatus(pct)}</span></td></tr>`;
+      });
+      html+=`</tbody></table></div></div>`;
+    }
+
+    html+=`</div>`;
+    return html;
+  }
+
+  async function loadMonthlyReport(){
+    if(!currentUser || !['external','admin'].includes(currentUser.role)){
+      monthlyReportMsg.textContent='Only External Auditors and Administrators can view the monthly report.';
+      return;
+    }
+    const month=reportMonth.value;
+    if(!month){
+      monthlyReportMsg.textContent='Please select an audit month.';
+      return;
+    }
+
+    monthlyReportMsg.style.color='var(--ink-soft)';
+    monthlyReportMsg.textContent='Loading monthly performance…';
+    const dashboard=document.getElementById('monthlyReportDashboard');
+    if(dashboard) dashboard.innerHTML='';
+
+    try{
+      const list=await getAuditsForSite('');
+      if(dashboard) dashboard.innerHTML=monthlyReportDashboardHtml(list||[],month);
+      monthlyReportMsg.style.color='var(--green-deep)';
+      monthlyReportMsg.textContent=`Showing read-only performance for ${reportMonthLabel(month)}.`;
+    }catch(e){
+      console.error(e);
+      monthlyReportMsg.style.color='var(--red)';
+      monthlyReportMsg.textContent='Could not load the monthly report: '+e.message;
+    }
   }
 
   async function downloadMonthlySummary(){
@@ -1991,55 +2321,54 @@ Continue with deletion?`))return;
       return;
     }
     monthlyReportMsg.style.color='var(--ink-soft)';
-    monthlyReportMsg.textContent='Preparing report…';
+    monthlyReportMsg.textContent='Preparing Excel report…';
     try{
       const list=await getAuditsForSite('');
-      const monthRows=(list||[])
-        .filter(x=>String(x.audit_month||'')===month)
-        .sort((a,b)=>String(a.site||'').localeCompare(String(b.site||'')));
-
-      if(!monthRows.length){
-        monthlyReportMsg.style.color='var(--red)';
-        monthlyReportMsg.textContent='No audit records were found for the selected month.';
-        return;
-      }
-
+      const map=reportRecordMap(list||[]);
       const MAX=GRAND_MAX+Q14_MAX;
+      const allSites=[...new Set(getAllSites().map(s=>String(s).trim()).filter(Boolean))].sort();
       const rows=[
         ['Vidullanka PLC — 5S Monthly Audit Summary'],
         ['Audit Month',month],
         ['Generated At',new Date().toLocaleString()],
         [],
-        ['Plant','Auditor','Auditor Type','Score','Maximum Score','Percentage','Status']
+        ['Plant','Completion','Auditor','Auditor Type','Score','Maximum Score','Percentage','Status']
       ];
 
-      let totalPct=0;
-      monthRows.forEach(x=>{
-        const score=Number(x.overall_total||0);
-        const pct=MAX ? (score/MAX)*100 : 0;
-        totalPct+=pct;
+      let totalPct=0, scored=0, completed=0, partial=0;
+      allSites.forEach(site=>{
+        const x=map.get(site+'|'+month);
+        const state=x ? reportRecordState(x) : 'pending';
+        const pct=x ? reportPct(x,MAX) : 0;
+        if(x){ scored++; totalPct+=pct; }
+        if(state==='completed') completed++;
+        if(state==='partial') partial++;
         rows.push([
-          x.site||'',
-          x.auditor||'',
-          String(x.auditor_type||'').toLowerCase()==='external'?'External Auditor':'Internal Auditor',
-          score,
-          MAX,
-          Number(pct.toFixed(1)),
-          reportStatus(pct)
+          site,
+          state==='completed'?'Completed':state==='partial'?'Partial Save':state==='unknown'?'Recorded':'Not Recorded',
+          x?.auditor||'',
+          String(x?.auditor_type||'').toLowerCase()==='external'?'External Auditor':x?'Internal Auditor':'',
+          x ? Number(x.overall_total||0) : '',
+          x ? MAX : '',
+          x ? Number(pct.toFixed(1)) : '',
+          x ? reportStatus(pct) : 'Pending'
         ]);
       });
 
-      const avg=totalPct/monthRows.length;
+      const avg=scored ? totalPct/scored : 0;
       rows.push([]);
       rows.push(['Monthly Summary']);
-      rows.push(['Plants Audited',monthRows.length]);
+      rows.push(['Total Plants',allSites.length]);
+      rows.push(['Final Audits',completed]);
+      rows.push(['Partial Saves',partial]);
+      rows.push(['Not Recorded',Math.max(0,allSites.length-completed-partial)]);
       rows.push(['Average Score (%)',Number(avg.toFixed(1))]);
-      rows.push(['Highest Performing Plant',monthRows.slice().sort((a,b)=>Number(b.overall_total||0)-Number(a.overall_total||0))[0]?.site||'']);
-      rows.push(['Lowest Performing Plant',monthRows.slice().sort((a,b)=>Number(a.overall_total||0)-Number(b.overall_total||0))[0]?.site||'']);
-      rows.push(['Plants Below 75%',monthRows.filter(x=>(Number(x.overall_total||0)/MAX*100)<75).length]);
+      rows.push(['Highest Performing Plant',allSites.map(s=>map.get(s+'|'+month)).filter(Boolean).sort((a,b)=>Number(b.overall_total||0)-Number(a.overall_total||0))[0]?.site||'']);
+      rows.push(['Lowest Performing Plant',allSites.map(s=>map.get(s+'|'+month)).filter(Boolean).sort((a,b)=>Number(a.overall_total||0)-Number(b.overall_total||0))[0]?.site||'']);
+      rows.push(['Plants Below 75%',allSites.map(s=>map.get(s+'|'+month)).filter(Boolean).filter(x=>reportPct(x,MAX)<75).length]);
 
       const ws=XLSX.utils.aoa_to_sheet(rows);
-      ws['!cols']=[{wch:16},{wch:28},{wch:18},{wch:12},{wch:14},{wch:14},{wch:22}];
+      ws['!cols']=[{wch:16},{wch:18},{wch:28},{wch:18},{wch:12},{wch:14},{wch:14},{wch:22}];
       const wb=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,ws,'Monthly Summary');
       const fname=`5S-Monthly-Audit-Summary-${month}.xlsx`;
@@ -2053,19 +2382,23 @@ Continue with deletion?`))return;
     }
   }
 
-  navMonthlyReportLink?.addEventListener('click',e=>{
+  navMonthlyReportLink?.addEventListener('click',async e=>{
     e.preventDefault();
     if(!currentUser || !['external','admin'].includes(currentUser.role)) return;
     reportMonth.value=new Date().toISOString().slice(0,7);
     monthlyReportMsg.textContent='';
-    monthlyReportMsg.style.color='var(--red)';
+    monthlyReportMsg.style.color='var(--ink-soft)';
     monthlyReportModal.style.display='flex';
+    await loadMonthlyReport();
   });
+  reportMonth?.addEventListener('change',loadMonthlyReport);
+  document.getElementById('refreshMonthlyReport')?.addEventListener('click',loadMonthlyReport);
   closeMonthlyReport?.addEventListener('click',()=>{ monthlyReportModal.style.display='none'; });
   monthlyReportModal?.addEventListener('click',e=>{
     if(e.target===monthlyReportModal) monthlyReportModal.style.display='none';
   });
   downloadMonthlyReport?.addEventListener('click',downloadMonthlySummary);
+
 
   // ---------------- Export to Excel ----------------
   function exportToExcel(){
