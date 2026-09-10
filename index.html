@@ -368,6 +368,13 @@
   .audit-locked .pill{cursor:not-allowed;opacity:.85;}
   .audit-locked textarea,.audit-locked input,.audit-locked select{background:#eef2ed !important;}
   .audit-locked .signature-pad-wrap{opacity:.85;}
+  .audit-locked .section-head{cursor:default;}
+  .auditor-option-note{font-size:11px;color:var(--ink-soft);margin-top:5px;}
+  .audit-final-lock-card{
+    margin-top:12px;padding:11px 13px;border:1px solid #a9cdb5;
+    background:#eef7f1;border-radius:8px;font-size:12px;color:#1F5A3B;
+  }
+  .audit-final-lock-card strong{font-weight:700;}
 
   @media (max-width: 640px) {
   .mast-brand {
@@ -508,7 +515,8 @@
     <div class="field">
       <label for="f-auditor">Auditor</label>
       <select id="f-auditor"><option value="">— select auditor —</option></select>
-      <input id="f-auditor-other" type="text" placeholder="Enter auditor name" style="display:none;margin-top:6px;" />
+      <div class="auditor-option-note">Select only a registered auditor account. Duplicate names are separated by auditor type, assigned site and username.</div>
+      <input id="f-auditor-other" type="text" placeholder="Enter auditor name" style="display:none;margin-top:6px;" disabled />
     </div>
     <div class="field" style="min-width:245px;flex:1.15;">
       <label>Auditor Type</label>
@@ -825,7 +833,7 @@
   // ---------------- State ----------------
   function blankAudit(){
     return {
-      meta:{org:'Vidullanka PLC', site:'', dept:'', month:'', auditor:'', auditorType:''},
+      meta:{org:'Vidullanka PLC', site:'', dept:'', month:'', auditor:'', auditorType:'', auditorUsername:'', auditorId:null},
       scores:{},          // itemKey -> 1..5
       sectionNotes:{},    // sectionId -> text
       q14:{ text:{}, score:{} }, // qid -> text / score(0-10)
@@ -1118,7 +1126,11 @@
       <textarea id="specialNote" style="width:100%;min-height:70px;margin-top:8px;font-family:inherit;font-size:13.5px;padding:9px 10px;border:1px solid var(--line);border-radius:6px;resize:vertical;">${audit.specialNote||''}</textarea>
     </div>`;
     bottomWrap.appendChild(noteCard);
-    noteCard.querySelector('#specialNote').addEventListener('input', e=>{ audit.specialNote = e.target.value; queuePartialSave(); });
+    noteCard.querySelector('#specialNote').addEventListener('input', e=>{
+      if(isFinalAuditLocked()) return;
+      audit.specialNote = e.target.value;
+      queuePartialSave();
+    });
 
     const grand = document.createElement('div');
     grand.className='grandcard';
@@ -1164,14 +1176,21 @@
           <b>Progress saving:</b> Your entered marks are automatically saved as a draft while you work. You can leave and return later using <b>Load Saved Audit</b>.
         </div>
         <div style="background:#fff8e8;border:1px solid #e2c36b;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;line-height:1.5;">
-          <b>Final submission:</b> Use <b>Save Audit</b> only after all marks, Q14 written responses, the Special Note by the Auditor, and the e-signature have been completed and checked.
+          <b>Final submission &amp; lock:</b> Use <b>Final Save &amp; Lock</b> only after all marks, Q14 written responses, the Special Note by the Auditor, and the e-signature have been completed and checked. After this, the audit becomes read-only.
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn-ghost" id="btnSaveProgress" type="button" style="flex:1;min-width:180px;">Save Progress</button>
-          <button class="btn-primary" id="btnSave" type="button" style="flex:1;min-width:180px;">Save Audit</button>
+          <button class="btn-primary" id="btnSave" type="button" style="flex:1;min-width:180px;">🔒 Final Save &amp; Lock</button>
         </div>
       </div>`;
     bottomWrap.appendChild(saveCard);
+
+    const lockInfo=document.createElement('div');
+    lockInfo.className='audit-final-lock-card';
+    lockInfo.innerHTML = isFinalAuditLocked()
+      ? '<strong>🔒 FINAL LOCK ACTIVE</strong> — This audit is read-only. Marks, responses, auditor details, and signature cannot be changed.'
+      : '<strong>Draft mode</strong> — You can continue entering and updating marks. Use <strong>Final Save &amp; Lock</strong> when the audit is fully checked.';
+    bottomWrap.appendChild(lockInfo);
     saveCard.querySelector('#btnSaveProgress').addEventListener('click', ()=>savePartialAudit(true));
     saveCard.querySelector('#btnSave').addEventListener('click', saveAudit);
     initSignaturePad();
@@ -1331,10 +1350,11 @@
     elSite.value = audit.meta.site||'';
     elDept.value = audit.meta.dept||'';
     elMonth.value = audit.meta.month||'';
-    elAuditor.value = audit.meta.auditor || currentUser?.full_name || '';
-    if(!audit.meta.auditor) audit.meta.auditor = currentUser?.full_name || '';
-    if(!audit.meta.auditorType){
-      audit.meta.auditorType = currentUser?.role === 'external' ? 'external' : 'internal';
+    if(!audit.meta.auditor && currentUser){
+      audit.meta.auditor = currentUser.full_name || '';
+      audit.meta.auditorType = currentUser.role === 'external' ? 'external' : 'internal';
+      audit.meta.auditorUsername = currentUser.username || '';
+      audit.meta.auditorId = currentUser.id ?? null;
     }
     if(auditorInternal) auditorInternal.checked = audit.meta.auditorType === 'internal';
     if(auditorExternal) auditorExternal.checked = audit.meta.auditorType === 'external';
@@ -1461,96 +1481,179 @@
 
   let auditorDirectory = [];
 
+  function auditorRoleLabel(role){
+    return role==='external' ? 'External Auditor' : 'Internal Auditor';
+  }
+
+  function normaliseAuditor(a, index){
+    const role=(a.role||'internal').toLowerCase()==='external'?'external':'internal';
+    const username=String(a.username||a.login_username||'').trim();
+    const id=a.id ?? a.user_id ?? null;
+    const sites=Array.isArray(a.sites)?a.sites:[];
+    const full_name=String(a.full_name||'').trim();
+    return {
+      ...a,
+      _index:index,
+      full_name,
+      role,
+      username,
+      id,
+      sites,
+      key: username ? `u:${username}` : (id!=null ? `id:${id}` : `row:${index}`)
+    };
+  }
+
+  function currentUserAuditorKey(){
+    if(!currentUser) return '';
+    if(currentUser.username) return `u:${currentUser.username}`;
+    if(currentUser.id!=null) return `id:${currentUser.id}`;
+    return '';
+  }
+
+  function auditorMatchesSite(a, site){
+    if(!site) return true;
+    if(a.role==='external') return true;
+    if(!Array.isArray(a.sites) || a.sites.length===0) return false;
+    return a.sites.some(x=>String(x).trim().toUpperCase()===String(site).trim().toUpperCase());
+  }
+
   async function refreshAuditorOptions(){
     if(!currentUser) return;
     try{
       const body=await api('/api/auditors');
-      auditorDirectory=(body.auditors||[]).map(a=>({
-        full_name:String(a.full_name||'').trim(),
-        role:(a.role||'internal').toLowerCase()==='external'?'external':'internal',
-        sites:Array.isArray(a.sites)?a.sites:[]
-      })).filter(a=>a.full_name);
 
-      // Always include the signed-in user even if the API directory is temporarily
-      // missing that user.
-      if(!auditorDirectory.some(a=>a.full_name===currentUser.full_name)){
-        auditorDirectory.unshift({
-          full_name:currentUser.full_name,
-          role:currentUser.role==='external'?'external':'internal',
-          sites:currentUser.sites||[]
-        });
+      auditorDirectory=(body.auditors||[])
+        .map((a,i)=>normaliseAuditor(a,i))
+        .filter(a=>a.full_name);
+
+      const me=normaliseAuditor({
+        id:currentUser.id,
+        username:currentUser.username,
+        full_name:currentUser.full_name,
+        role:currentUser.role,
+        sites:currentUser.sites||[]
+      },-1);
+
+      if(!auditorDirectory.some(a=>
+        (me.username && a.username===me.username) ||
+        (me.id!=null && a.id!=null && String(a.id)===String(me.id))
+      )){
+        auditorDirectory.unshift(me);
       }
 
-      const options = auditorDirectory.map(a =>
-        `<option value="${escHtml(a.full_name)}">${escHtml(a.full_name)} · ${a.role==='external'?'External Auditor':'Internal Auditor'}</option>`
-      ).join('');
+      const site=audit.meta.site||'';
+      const visible=auditorDirectory.filter(a=>auditorMatchesSite(a,site));
 
-      elAuditor.innerHTML =
-        '<option value="">— select auditor —</option>' +
-        options +
-        '<option value="__other__">Other / Enter name</option>';
+      const options=visible.map(a=>{
+        const siteText=a.sites?.length ? ` · ${a.sites.join(', ')}` : '';
+        const accountText=a.username ? ` · @${a.username}` : '';
+        return `<option value="${escHtml(a.key)}">${escHtml(a.full_name)} · ${auditorRoleLabel(a.role)}${escHtml(siteText)}${escHtml(accountText)}</option>`;
+      }).join('');
 
-      const current=audit.meta.auditor || currentUser.full_name || '';
-      if(auditorDirectory.some(a=>a.full_name===current)){
-        elAuditor.value=current;
+      elAuditor.innerHTML='<option value="">— select registered auditor —</option>'+options;
+
+      const wantedKey =
+        audit.meta.auditorUsername ? `u:${audit.meta.auditorUsername}` :
+        audit.meta.auditorId!=null ? `id:${audit.meta.auditorId}` : '';
+
+      let selected= wantedKey && visible.find(a=>a.key===wantedKey);
+
+      if(!selected && audit.meta.auditor){
+        selected=visible.find(a=>
+          a.full_name===audit.meta.auditor &&
+          a.role===audit.meta.auditorType
+        );
+      }
+
+      if(!selected && !audit.meta.auditor){
+        const meKey=currentUserAuditorKey();
+        selected=visible.find(a=>a.key===meKey);
+      }
+
+      if(selected){
+        elAuditor.value=selected.key;
         elAuditorOther.style.display='none';
         syncAuditorTypeFromSelection();
-      }else if(current){
-        elAuditor.value='__other__';
-        elAuditorOther.style.display='block';
-        elAuditorOther.value=current;
-        if(!audit.meta.auditorType) audit.meta.auditorType=currentUser.role==='external'?'external':'internal';
-        auditorInternal.disabled=false;
-        auditorExternal.disabled=false;
+      }else if(audit.meta.auditor){
+        elAuditor.innerHTML += `<option value="__legacy__">${escHtml(audit.meta.auditor)} · ${auditorRoleLabel(audit.meta.auditorType||'internal')} · Legacy record</option>`;
+        elAuditor.value='__legacy__';
+        elAuditorOther.style.display='none';
+        auditorInternal.disabled=true;
+        auditorExternal.disabled=true;
         auditorInternal.checked=audit.meta.auditorType==='internal';
         auditorExternal.checked=audit.meta.auditorType==='external';
+      }else{
+        elAuditor.value='';
       }
+
+      elAuditorOther.style.display='none';
+      elAuditorOther.disabled=true;
     }catch(e){
       console.error(e);
-      // Keep the current user usable even if the auditor directory endpoint fails.
-      elAuditor.innerHTML='<option value="">— select auditor —</option>' +
-        `<option value="${escHtml(currentUser.full_name)}">${escHtml(currentUser.full_name)} · ${currentUser.role==='external'?'External Auditor':'Internal Auditor'}</option>` +
-        '<option value="__other__">Other / Enter name</option>';
-      elAuditor.value=audit.meta.auditor||currentUser.full_name;
+      const me=normaliseAuditor({
+        id:currentUser.id,
+        username:currentUser.username,
+        full_name:currentUser.full_name,
+        role:currentUser.role,
+        sites:currentUser.sites||[]
+      },-1);
+      auditorDirectory=[me];
+      elAuditor.innerHTML=`<option value="${escHtml(me.key)}">${escHtml(me.full_name)} · ${auditorRoleLabel(me.role)}${me.username?` · @${escHtml(me.username)}`:''}</option>`;
+      elAuditor.value=me.key;
+      elAuditorOther.style.display='none';
+      elAuditorOther.disabled=true;
       syncAuditorTypeFromSelection();
     }
   }
 
   function syncAuditorTypeFromSelection(){
-    const name=elAuditor.value;
-    const found=auditorDirectory.find(a=>a.full_name===name);
+    const key=elAuditor.value;
+    const found=auditorDirectory.find(a=>a.key===key);
     if(found){
       audit.meta.auditor=found.full_name;
       audit.meta.auditorType=found.role;
+      audit.meta.auditorUsername=found.username||'';
+      audit.meta.auditorId=found.id ?? null;
       auditorInternal.checked=found.role==='internal';
       auditorExternal.checked=found.role==='external';
       auditorInternal.disabled=true;
       auditorExternal.disabled=true;
       elAuditorOther.style.display='none';
+      elAuditorOther.disabled=true;
       elAuditorOther.value='';
-    }else if(name==='__other__'){
-      auditorInternal.disabled=false;
-      auditorExternal.disabled=false;
-      const role=audit.meta.auditorType || (currentUser?.role==='external'?'external':'internal');
-      auditorInternal.checked=role==='internal';
-      auditorExternal.checked=role==='external';
-      elAuditorOther.style.display='block';
+    }else if(key==='__legacy__'){
+      auditorInternal.checked=audit.meta.auditorType==='internal';
+      auditorExternal.checked=audit.meta.auditorType==='external';
+      auditorInternal.disabled=true;
+      auditorExternal.disabled=true;
+      elAuditorOther.style.display='none';
+      elAuditorOther.disabled=true;
+    }else{
+      audit.meta.auditor='';
+      audit.meta.auditorType='';
+      audit.meta.auditorUsername='';
+      audit.meta.auditorId=null;
     }
   }
 
   function applyAuditorSelection(){
-    const v=elAuditor.value;
-    if(v==='__other__'){
-      audit.meta.auditor=elAuditorOther.value.trim();
-      audit.meta.auditorType=auditorExternal.checked?'external':'internal';
-    }else if(v){
-      const found=auditorDirectory.find(a=>a.full_name===v);
-      audit.meta.auditor=found?.full_name || v;
-      audit.meta.auditorType=found?.role || audit.meta.auditorType || 'internal';
+    const key=elAuditor.value;
+    const found=auditorDirectory.find(a=>a.key===key);
+
+    if(found){
+      audit.meta.auditor=found.full_name;
+      audit.meta.auditorType=found.role;
+      audit.meta.auditorUsername=found.username||'';
+      audit.meta.auditorId=found.id ?? null;
+    }else if(key==='__legacy__'){
+      return;
     }else{
       audit.meta.auditor='';
       audit.meta.auditorType='';
+      audit.meta.auditorUsername='';
+      audit.meta.auditorId=null;
     }
+
     if(auditorInternal) auditorInternal.checked=audit.meta.auditorType==='internal';
     if(auditorExternal) auditorExternal.checked=audit.meta.auditorType==='external';
   }
@@ -1563,23 +1666,12 @@
     queuePartialSave();
   });
 
-  elAuditorOther.addEventListener('input',()=>{
-    if(isFinalAuditLocked()) return;
-    applyAuditorSelection();
-    refreshAll();
-    queuePartialSave();
-  });
+  elAuditorOther.addEventListener('input',()=>{ return; });
 
   [auditorInternal,auditorExternal].forEach(r=>{
     r?.addEventListener('change',()=>{
       if(isFinalAuditLocked()) return;
-      if(elAuditor.value==='__other__'){
-        audit.meta.auditorType=r.value;
-        auditorInternal.checked=r.value==='internal';
-        auditorExternal.checked=r.value==='external';
-        refreshAll();
-        queuePartialSave();
-      }
+      syncAuditorTypeFromSelection();
     });
   });
 
@@ -1624,6 +1716,13 @@
       }
     }else if(banner){
       banner.remove();
+    }
+
+    const lockInfo=document.querySelector('.audit-final-lock-card');
+    if(lockInfo){
+      lockInfo.innerHTML = locked
+        ? '<strong>🔒 FINAL LOCK ACTIVE</strong> — This audit is read-only. Marks, responses, auditor details, and signature cannot be changed.'
+        : '<strong>Draft mode</strong> — You can continue entering and updating marks. Use <strong>Final Save &amp; Lock</strong> when the audit is fully checked.';
     }
   }
 
@@ -1678,23 +1777,15 @@
       elSite.value='';
     }
 
-    // Keep the selected auditor/type visible and consistent.
-    if(elAuditor.value!==audit.meta.auditor){
-      if(auditorDirectory.some(a=>a.full_name===audit.meta.auditor)){
-        elAuditor.value=audit.meta.auditor;
-      }else if(audit.meta.auditor){
-        elAuditor.value='__other__';
-        elAuditorOther.style.display='block';
-        elAuditorOther.value=audit.meta.auditor;
-      }
+    // Auditor selection is account-based. Duplicate names are kept separate
+    // by username/user id and auditor type; free-text auditor names are not allowed.
+    if(elAuditor.value!=='__legacy__'){
+      elAuditorOther.style.display='none';
+      elAuditorOther.disabled=true;
+      const meKey=currentUserAuditorKey();
+      if(!audit.meta.auditor && meKey) audit.meta.auditorKey=meKey;
     }
     syncAuditorTypeFromSelection();
-    if(elAuditor.value==='__other__'){
-      auditorInternal.disabled=false;
-      auditorExternal.disabled=false;
-      auditorInternal.checked=audit.meta.auditorType==='internal';
-      auditorExternal.checked=audit.meta.auditorType==='external';
-    }
   }
 
   async function getAuditsForSite(site){
@@ -1742,7 +1833,8 @@
       list.map(x=>{
         const month=x.audit_month||'';
         const type=(x.auditor_type||'').toLowerCase()==='external' ? 'External Auditor' : 'Internal Auditor';
-        const label=`${x.site||''} · ${month} · ${x.auditor||''} · ${type} (${x.overall_total||0}/${GRAND_MAX+Q14_MAX})`;
+        const account=x.auditor_username ? ` · @${x.auditor_username}` : '';
+        const label=`${x.site||''} · ${month} · ${x.auditor||''} · ${type}${account} (${x.overall_total||0}/${GRAND_MAX+Q14_MAX})`;
         return `<option value="${escHtml((x.site||'')+'|'+month)}">${escHtml(label)}</option>`;
       }).join('');
 
@@ -1770,7 +1862,9 @@
           dept:data.department||'',
           month:data.audit_month||month,
           auditor:data.auditor || data.audit?.meta?.auditor || '',
-          auditorType:savedType==='external'?'external':savedType==='internal'?'internal':''
+          auditorType:savedType==='external'?'external':savedType==='internal'?'internal':'',
+          auditorUsername:data.auditor_username || data.audit?.meta?.auditorUsername || '',
+          auditorId:data.auditor_id ?? data.audit?.meta?.auditorId ?? null
         },
         scores:data.scores||{},
         sectionNotes:data.section_notes||{},
@@ -1845,6 +1939,8 @@
         audit_month:audit.meta.month,
         auditor:audit.meta.auditor,
         auditor_type:audit.meta.auditorType,
+        auditor_username:audit.meta.auditorUsername||currentUser?.username||'',
+        auditor_id:audit.meta.auditorId ?? currentUser?.id ?? null,
         audit,
         overall_total:overallTotal
       })});
@@ -1885,6 +1981,14 @@
     if(!audit.meta.site){ showStatus('Please select a plant site before saving.',true); elSite.focus(); return; }
     if(!audit.meta.month){ showStatus('Please choose an audit month before saving.',true); return; }
     applyAuditorSelection();
+    if(!audit.meta.auditor || !audit.meta.auditorType){
+      showStatus('Please select a registered auditor account. Free-text auditor names are not allowed.',true);
+      return;
+    }
+    if(elAuditor.value==='__legacy__'){
+      showStatus('This legacy auditor record cannot be used for a new final submission. Select a registered auditor account.',true);
+      return;
+    }
     if(enteredMarkCount()===0){ showStatus('No marks have been entered yet. Please enter marks before saving the final audit.',true); return; }
     const missingScores=SECTIONS.flatMap(s=>s.items.map(([code])=>itemKey(s.id,code))).filter(k=>audit.scores[k]===undefined || audit.scores[k]===null || audit.scores[k]==='');
     if(missingScores.length){ showStatus(`Please enter marks for all 82 checklist questions. ${missingScores.length} mark(s) are still missing.`,true); return; }
@@ -1895,6 +1999,18 @@
     if(!String(audit.specialNote||'').trim()){ showStatus('Please complete the Special Note by the Auditor before saving.',true); document.getElementById('specialNote')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     if(!audit.signature || !audit.signature.dataUrl){ showStatus('Please provide the auditor e-signature before saving the final audit.',true); document.getElementById('signatureCanvas')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     const overallTotal = SECTIONS.reduce((a,s)=>a+sectionTotal(s),0) + q14Total();
+
+    if(!confirm(
+      `FINAL SUBMISSION\n\n`+
+      `Site: ${audit.meta.site}\n`+
+      `Month: ${audit.meta.month}\n`+
+      `Auditor: ${audit.meta.auditor} · ${audit.meta.auditorType==='external'?'External Auditor':'Internal Auditor'}\n`+
+      `Score: ${overallTotal} / ${GRAND_MAX+Q14_MAX}\n\n`+
+      `After you confirm, this audit will be locked for normal users. `+
+      `Marks, responses, auditor details and signature cannot be edited from the audit screen.\n\n`+
+      `Continue with Final Save & Lock?`
+    )) return;
+
     audit.savedAt = new Date().toISOString();
     audit.meta.saveStatus='final';
     audit.meta.lastSavedType='final';
@@ -1909,6 +2025,8 @@
         audit_month:audit.meta.month,
         auditor:audit.meta.auditor,
         auditor_type:audit.meta.auditorType,
+        auditor_username:audit.meta.auditorUsername||currentUser?.username||'',
+        auditor_id:audit.meta.auditorId ?? currentUser?.id ?? null,
         audit,
         overall_total:overallTotal
       })});
@@ -2415,6 +2533,8 @@ Continue with deletion?`))return;
     rows.push(['Department / Sub-area', audit.meta.dept||'']);
     rows.push(['Audit month', audit.meta.month||'']);
     rows.push(['Auditor', audit.meta.auditor||'']);
+    rows.push(['Auditor Type', audit.meta.auditorType==='external'?'External Auditor':audit.meta.auditorType==='internal'?'Internal Auditor':'']);
+    rows.push(['Auditor Username', audit.meta.auditorUsername||'']);
     rows.push(['Saved at', audit.savedAt||'']);
     rows.push([]);
     rows.push(['S.No','Description','Rating (1-5)','Rating label']);
@@ -2487,6 +2607,8 @@ Continue with deletion?`))return;
     body += metaRow('Department / Sub-area', audit.meta.dept);
     body += metaRow('Audit month', audit.meta.month);
     body += metaRow('Auditor', audit.meta.auditor);
+    body += metaRow('Auditor Type', audit.meta.auditorType==='external'?'External Auditor':audit.meta.auditorType==='internal'?'Internal Auditor':'');
+    body += metaRow('Auditor Username', audit.meta.auditorUsername||'');
     body += `</table>`;
 
     SECTIONS.forEach(section=>{
